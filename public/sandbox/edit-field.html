@@ -1,0 +1,16 @@
+<span ng-switch on="field.type.view">
+      <span ng-switch-when="select">
+    <select
+            ng-model="entity[field.name]"
+            name="{{field.name}}"
+            ng-options="item.id as item.name for item in field.type.options">
+
+    </select>
+  </span>
+  <span ng-switch-when="input">
+    <input
+        ng-model="entity[field.name]"
+        name="{{field.name}}"
+        type="text"/>
+  </span>
+</span>

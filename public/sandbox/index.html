@@ -1,0 +1,38 @@
+<html>
+<head>
+  <title>Form Generation AngularJS App</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+  <script src="controller/app.js"></script>
+  <script src="controller/formGenCtrl.js"></script>
+  <title>no title</title>
+</head>
+<body ng-app="app" ng-controller="FormGenerationController">
+
+  <h1>Edit/New mode:</h1>
+
+
+  <form action="moon" method="post">
+
+  <div ng-repeat="y in fieldSet">
+<!--<p style="border:dashed purple 1px;">level-> {{$index}}::: {{y | json}}</p>-->
+
+    <div ng-repeat="field in y">
+      <!-- <p style="border:solid green 1px;"> Name: {{field | json:3}} </p>
+       this is ::: {{field.name}}<br>
+       field type view :: {{field.type.view}}-->
+       <ng-include src="'edit-field.html'"/>
+    </div>
+
+
+  </div>
+
+  <div style="margin-top:100px;">
+    <h1>Your entity JSON:</h1>
+    {{ entity }}
+  </div>
+  <button type="submit" value="submit">shit</button>
+  </form>
+
+
+</body>
+</html>

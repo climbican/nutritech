@@ -1,0 +1,14 @@
+<span ng-switch-when="select">
+       {{ field.type.options[entity[field.name]].name }}
+  </span>
+  <span ng-switch-when="input">
+    {{ entity[field.name] }}
+  </span>
+
+
+
+
+
+@foreach($elements as $e)
+<option value="{{$e->id}}">{{$e->element_name}}</option>
+@endforeach
