@@ -78,8 +78,12 @@ Route::post('admin/deficiency/remove/image/{number}/{id}', 'DeficiencyController
 Route::get('admin/sufficiency/list', 'SufficiencyController@index');
 Route::get('admin/sufficiency/create', 'SufficiencyController@create');
 Route::post('admin/sufficiency/save', 'SufficiencyController@save');
-Route::get('admin/sufficiency/update', 'SufficiencyController@updateForm');
+Route::get('admin/sufficiency/update/{id}', 'SufficiencyController@updateForm');
+Route::post('admin/sufficiency/update/{id}', 'SufficiencyController@update');
 Route::get('admin/sufficiency/delete/{id}', 'SufficiencyController@delete');
+Route::get('admin/sufficiency/json-list', 'SufficiencyController@fetch_all_suff_page');
+// this one just pulls the data via AJAX
+Route::get('admin/sufficiency/json_data/', 'SufficiencyController@fetch_all_suff');
 
 //UPDATE USER PASSWORD
 Route::get('admin/profile/form/{id}', 'ProfileController@updateForm');

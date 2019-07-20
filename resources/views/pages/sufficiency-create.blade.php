@@ -34,7 +34,7 @@
                                                 value="0"
                                                 data-placeholder="Select a Crop..." class="w-100">
                                             @foreach($crops as $e)
-                                                <option value="{{$e->id}}">{{$e->name}}</option>
+                                                <option value="{{$e->id}}">{{$e->name}} @if($e->sub_type !== ''){{ '/ ' . $e->sub_type}}@endif</option>
                                             @endforeach
                                         </select>
                                     </div>

@@ -45,7 +45,7 @@ class CropController extends Controller{
         $items = Crop::all();
 
         foreach($items as $item) {
-            array_push($result, array('id'=>$item->id, 'name'=>$item->name, 'image'=>$item->image_url)) ; //'symbol'=>$item->symbol,  future use
+            array_push($result, array('id'=>$item->id, 'name'=>$item->name.' '.$item->sub_type, 'image'=>$item->image_url)) ; //'symbol'=>$item->symbol,  future use
         }
 
         return json_encode($result);

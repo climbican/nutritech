@@ -16,7 +16,7 @@
                 </div>
             @endif
             <div class="card">
-                <form name="update_element_item" method="post" action="{{url('admin/element/update'.'/'.$element->id)}}">
+                <form name="update_element_item" method="post" action="{{url('admin/element/update/'.$element->id)}}">
                     {!! csrf_field() !!}
                     <div class="card-body card-padding">
                         <div class="form-group m-b-30 fg-toggled"

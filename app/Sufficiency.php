@@ -27,7 +27,9 @@ class Sufficiency extends Model
 		'na_percent',
 		'ci_percent',
 		'create_dte',
-		'added_by'];
+		'added_by',
+		'last_update',
+		'last_update_by'];
 	public $timestamps = false;
 	protected $dateFormat = 'U';
 }

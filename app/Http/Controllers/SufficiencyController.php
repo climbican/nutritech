@@ -24,12 +24,47 @@ class SufficiencyController extends Controller{
 			->join('crop', 'crop.id', '=', 'sufficiency.crop_id')
 			->join('sample_unit', 'sample_unit.id', '=', 'sufficiency.sample_unit_id')
 			->join('growth_stage', 'growth_stage.id', '=', 'sufficiency.growth_stage_id')
-			->paginate(10,['sufficiency.id AS id', 'sufficiency.create_dte AS create_dte', 'sufficiency.added_by AS added_by', 'crop.name AS cropName', 'crop.image_url as imageUrl',
+			->paginate(10,['sufficiency.id AS id', 'sufficiency.create_dte AS create_dte', 'sufficiency.added_by AS added_by', 'sufficiency.n_percent', 'sufficiency.no3_ppm', 'sufficiency.p_percent',
+				'sufficiency.po4_ppm', 'sufficiency.k_percent', 'sufficiency.ca_percent', 'sufficiency.mg_percent', 'sufficiency.s_percent', 'sufficiency.b_ppm', 'sufficiency.cu_ppm', 'sufficiency.fe_ppm',
+				'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.ci_percent',
+				'crop.name AS cropName', 'crop.sub_type', 'crop.image_url as imageUrl',
 				'growth_stage.name_desc AS growthStageName', 'sample_unit.name_desc AS sampleUnitName'], 'page', null, 'sufficiency');
 
 		$numRows = Sufficiency::count();
 
 		return view('pages.sufficiency-list', compact('sufficiency', 'numRows'));
+	}
+
+
+	public function fetch_all_suff_page() {
+		return view('pages.sufficiency_json');
+	}
+	/**
+	 * @desc for the moment this is just to export the data for the DB. should create a page for the admin panel to make export more secure and easier...
+	 * @params json_out [boolean]
+	 * @return false|string || \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function fetch_all_suff() {
+		$return_suff = [];
+		$sufficiency = DB::table('sufficiency')
+		                 ->join('crop', 'crop.id', '=', 'sufficiency.crop_id')
+		                 ->join('sample_unit', 'sample_unit.id', '=', 'sufficiency.sample_unit_id')
+		                 ->join('growth_stage', 'growth_stage.id', '=', 'sufficiency.growth_stage_id')
+						 ->orderBy('sufficiency.id', 'asc')
+		                 ->get(['sufficiency.id AS id', 'sufficiency.create_dte AS createDte',
+			                 'crop.id AS cropId','crop.name AS cropName', 'crop.sub_type AS cropSubType', 'crop.image_url as imageUrl',
+			                 'growth_stage.id AS growthStageId','growth_stage.name_desc AS growthStageName',
+			                 'sample_unit.id AS sampleUnitId', 'sample_unit.name_desc AS sampleUnitName'])
+		                 ->all();
+
+		// one test method of removing the escape character
+		// $t = preg_replace('/"([^"]+)"\s*:\s*/', '$1:', json_encode($sufficiency));
+		foreach ($sufficiency as $key=>$value) {
+			$value->cropName = ($value->cropSubType === '' || strtolower($value->cropSubType) == 'general' || strtolower($value->cropSubType) == 'none') ? $value->cropName : $value->cropName . ' / ' . $value->cropSubType;
+			unset($value->cropSubType);
+		}
+
+		return json_encode(['status'=>200, 'message'=>'Your list of Sufficiencies', 'list'=>$sufficiency]);
 	}
 
 	/**
@@ -99,7 +134,6 @@ class SufficiencyController extends Controller{
 		}
 
 		if(isset($suff['newSampleUnitLabel']) && $suff['sampleUnitId'] === 0){
-			Log::info('new sample unit present');
 			$suNew = new SampleUnit();
 			$suNew->name_desc = $suff['newSampleUnitLabel'];
 			$res_su = $suNew->save();
@@ -117,32 +151,74 @@ class SufficiencyController extends Controller{
 		$crops = Crop::all();
 		$growthstage = GrowthStage::all();
 		$sample_unit = SampleUnit::all();
-		return view('pages.sufficiency-update', compact('crops', 'growthstage', 'sample_unit'));
+		$suff = Sufficiency::find($id);
+		return view('pages.sufficiency-update', compact('suff','crops', 'growthstage', 'sample_unit'));
 	}
 
 	public function update(Request $request, $id){
-		$element = Element::find($id);
+		$suff = Sufficiency::find($id);
 
-		$this->validate($request,[
-			'symbol'=>'min:3|max:50',
-			'elementName'=>'min:1|max:45|required',
-			'chemicalName'=>'min:1|max:45',
-			'elementDesc'=>'min:10|max:75']);
+		/// THESE ARE THE CURRENT ELEMENT FIELDS IN THE SUFFICIENCY FORM
+		$optional_fields = ['nPercent' => 'n_percent', 'no3PPM'=>'no3_ppm', 'pPercent'=>'p_percent', 'po4PPM'=>'po4_ppm',
+		                    'kPercent'=>'k_percent', 'caPercent'=>'ca_percent', 'mgPercent'=>'mg_percent', 'sPercent'=>'s_percent', 'bPPM'=>'b_ppm', 'cuPPM'=>'cu_ppm',
+		                    'fePPM'=>'fe_ppm', 'mnPPM'=>'mn_ppm', 'znPPM'=>'zn_ppm', 'naPercent'=>'na_percent', 'ciPercent'=>'ci_percent'];
 
-		$validated = $request->all();
+		if($request->growthStageId === '? undefined:undefined ?'){
+			$request->growthStageId = 0;
+			$request['growthStageId'] = 0;
+			$_POST['growthStageId'] = 0;
+		}
+		if($request->sampleUnitId === '? undefined:undefined ?'){
+			$request->sampleUnitId = 0;
+			$request['sampleUnitId'] = 0;
+			$_POST['sampleUnitId'] = 0;
+		}
 
-		if(isset($validated['elementName']) && $validated['elementName'] != ''){ $element->element_name = $validated['elementName']; }
-		if(isset($validated['chemicalName']) && $validated['chemicalName'] != ''){ $element->chemical_name = $validated['chemicalName']; }
-		if(isset($validated['elementDesc']) && $validated['elementDesc'] != ''){ $element->element_desc = $validated['elementDesc']; }
-		if(isset($validated['benefitsText']) && $validated['benefitsText'] != ''){$element['benefits'] = $validated['benefitsText'];}
-		if(isset($validated['deficiencyText']) && $validated['deficiencyText'] != ''){$element['deficiency'] = $validated['deficiencyText'];}
+		// TODO: NEED TO DO A EITHER OR KIND OF VALIDATION.  IT SHOULD HAVE  A NEW VAL OR THE NEW ONE
+		// ALSO IT'S RETURNING AN ERROR OF MAX 3 CHAR WHEN IT'S EMPTY
 
-		$element->last_update_by = Auth::user()->id;
-		$element->last_update = time();
-		$element->save();
-		\Session::flash('flash_message', 'Successfully updated this Element!');
+		$this->validate($request, [
+			'cropId' => 'min:1|max:3|required',
+			'growthStageId' => 'min:1|max:3',
+			'sampleUnitId' => 'min:1|max:3']);
 
-		return redirect('admin/element/list');
+
+		foreach ($optional_fields as $key=>$val ){
+			if (isset($request->$key)) {
+				$suff->$val = $request->$key;
+			}
+			else{
+				$suff->$val = '';
+			}
+		}
+		// maybe seperate the arrays to make debuggin easier.... $suff from request->all and array to save...
+		$suff->crop_id = $request->cropId;
+		$suff->growth_stage_id = $request->growthStageId;
+		$suff->sample_unit_id = $request->sampleUnitId;
+		$suff->last_update = time();
+		$suff->last_update_by = Auth::user()->id;
+
+
+		// I'm using this method because there are many repeats and want to minimize data scattering
+		if(isset($suff['newGrowthStageLabel']) && $suff['growthStageId'] === 0){
+			$gsNew = new GrowthStage();
+			$gsNew->name_desc = $suff['newGrowthStageLabel'];
+			$res = $gsNew->save();
+			$suff['growth_stage_id'] = DB::getPdo()->lastInsertId();
+		}
+
+		if(isset($suff['newSampleUnitLabel']) && $suff['sampleUnitId'] === 0){
+			$suNew = new SampleUnit();
+			$suNew->name_desc = $suff['newSampleUnitLabel'];
+			$res_su = $suNew->save();
+			$suff['sample_unit_id'] = DB::getPdo()->lastInsertId();
+		}
+
+		$suff->save();
+		\Session::flash('flash_message', 'Successfully Updated Sufficiency!');
+		//will need  a proper response here
+		//return response()->json($compatibility);
+		return redirect('admin/sufficiency/list');
 	}
 
 	public function delete($id){
