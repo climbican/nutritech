@@ -123,6 +123,7 @@ class ProductController extends Controller{
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
         //TRACKING
         $product->added_by = Auth::user()->id;
+        $product->last_update_by = Auth::user()->id;
         $product->create_dte = $nowTime;
         $product->last_update = $nowTime;
         $product->removed_dte = $nowTime;

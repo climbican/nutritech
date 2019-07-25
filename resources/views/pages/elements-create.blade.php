@@ -37,7 +37,7 @@
                             <div class="fg-line">
                                 <input type="text" name="chemicalName" ng-model="chemicalName"
                                        class="form-control fg-input"
-                                       ng-minlength="3" ng-maxlength="45">
+                                       ng-minlength="1" ng-maxlength="45">
                                 <label class="fg-label">Chemical Name</label>
                             </div>
                             <div ng-messages="create_element_item.chemicalName.$error" ng-show="create_element_item.chemicalName.$dirty">

@@ -24,6 +24,7 @@ class SufficiencyController extends Controller{
 			->join('crop', 'crop.id', '=', 'sufficiency.crop_id')
 			->join('sample_unit', 'sample_unit.id', '=', 'sufficiency.sample_unit_id')
 			->join('growth_stage', 'growth_stage.id', '=', 'sufficiency.growth_stage_id')
+			->orderBy('sufficiency.id', 'desc')
 			->paginate(10,['sufficiency.id AS id', 'sufficiency.create_dte AS create_dte', 'sufficiency.added_by AS added_by', 'sufficiency.n_percent', 'sufficiency.no3_ppm', 'sufficiency.p_percent',
 				'sufficiency.po4_ppm', 'sufficiency.k_percent', 'sufficiency.ca_percent', 'sufficiency.mg_percent', 'sufficiency.s_percent', 'sufficiency.b_ppm', 'sufficiency.cu_ppm', 'sufficiency.fe_ppm',
 				'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.ci_percent',
@@ -40,7 +41,7 @@ class SufficiencyController extends Controller{
 		return view('pages.sufficiency_json');
 	}
 	/**
-	 * @desc for the moment this is just to export the data for the DB. should create a page for the admin panel to make export more secure and easier...
+	 * @desc for the moment this is just to export the data for the DB.
 	 * @params json_out [boolean]
 	 * @return false|string || \Illuminate\Contracts\View\Factory|\Illuminate\View\View
 	 */
@@ -54,7 +55,9 @@ class SufficiencyController extends Controller{
 		                 ->get(['sufficiency.id AS id', 'sufficiency.create_dte AS createDte',
 			                 'crop.id AS cropId','crop.name AS cropName', 'crop.sub_type AS cropSubType', 'crop.image_url as imageUrl',
 			                 'growth_stage.id AS growthStageId','growth_stage.name_desc AS growthStageName',
-			                 'sample_unit.id AS sampleUnitId', 'sample_unit.name_desc AS sampleUnitName'])
+			                 'sample_unit.id AS sampleUnitId', 'sample_unit.name_desc AS sampleUnitName','sufficiency.n_percent', 'sufficiency.no3_ppm', 'sufficiency.p_percent',
+			                 'sufficiency.po4_ppm', 'sufficiency.k_percent', 'sufficiency.ca_percent', 'sufficiency.mg_percent', 'sufficiency.s_percent', 'sufficiency.b_ppm', 'sufficiency.cu_ppm', 'sufficiency.fe_ppm',
+			                 'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.ci_percent'])
 		                 ->all();
 
 		// one test method of removing the escape character
@@ -121,6 +124,7 @@ class SufficiencyController extends Controller{
 		$suff['growth_stage_id'] = $suff['growthStageId'];
 		$suff['sample_unit_id'] = $suff['sampleUnitId'];
 		$suff['added_by'] = Auth::user()->id;
+		$suff['last_update_by'] = Auth::user()->id;
 		$suff['create_dte'] = time();
 		$suff['last_update'] = time();
 

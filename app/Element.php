@@ -14,6 +14,7 @@ class Element extends Model
         'element_desc',
         'deficiency',
         'benefits',
+	    'show_flag',
         'create_dte',
         'last_update'];
     public $timestamps = false;
