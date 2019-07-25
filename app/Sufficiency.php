@@ -25,7 +25,7 @@ class Sufficiency extends Model
 		'mn_ppm',
 		'zn_ppm',
 		'na_percent',
-		'ci_percent',
+		'cl_percent',
 		'create_dte',
 		'added_by',
 		'last_update',

@@ -58,7 +58,7 @@
                                         <li><strong>MN PPM</strong> @if($suff->mn_ppm == '')--@else{{$suff->mn_ppm}}@endif</li>
                                         <li><strong>ZN PPM</strong> @if($suff->zn_ppm == '')--@else{{$suff->zn_ppm}}@endif</li>
                                         <li><strong>NA Percent</strong> @if($suff->na_percent == '')--@else{{$suff->na_percent}}@endif</li>
-                                        <li><strong>CI Percent</strong> @if($suff->ci_percent == '')--@else{{$suff->ci_percent}}@endif</li>
+                                        <li><strong>CI Percent</strong> @if($suff->cl_percent == '')--@else{{$suff->cl_percent}}@endif</li>
                                     </ul>
                                     <div class="lv-actions actions dropdown" uib-dropdown>
                                         <a href="" uib-dropdown-toggle aria-expanded="true">

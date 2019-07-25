@@ -27,7 +27,7 @@ class SufficiencyController extends Controller{
 			->orderBy('sufficiency.id', 'desc')
 			->paginate(10,['sufficiency.id AS id', 'sufficiency.create_dte AS create_dte', 'sufficiency.added_by AS added_by', 'sufficiency.n_percent', 'sufficiency.no3_ppm', 'sufficiency.p_percent',
 				'sufficiency.po4_ppm', 'sufficiency.k_percent', 'sufficiency.ca_percent', 'sufficiency.mg_percent', 'sufficiency.s_percent', 'sufficiency.b_ppm', 'sufficiency.cu_ppm', 'sufficiency.fe_ppm',
-				'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.ci_percent',
+				'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.cl_percent',
 				'crop.name AS cropName', 'crop.sub_type', 'crop.image_url as imageUrl',
 				'growth_stage.name_desc AS growthStageName', 'sample_unit.name_desc AS sampleUnitName'], 'page', null, 'sufficiency');
 
@@ -57,7 +57,7 @@ class SufficiencyController extends Controller{
 			                 'growth_stage.id AS growthStageId','growth_stage.name_desc AS growthStageName',
 			                 'sample_unit.id AS sampleUnitId', 'sample_unit.name_desc AS sampleUnitName','sufficiency.n_percent', 'sufficiency.no3_ppm', 'sufficiency.p_percent',
 			                 'sufficiency.po4_ppm', 'sufficiency.k_percent', 'sufficiency.ca_percent', 'sufficiency.mg_percent', 'sufficiency.s_percent', 'sufficiency.b_ppm', 'sufficiency.cu_ppm', 'sufficiency.fe_ppm',
-			                 'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.ci_percent'])
+			                 'sufficiency.mn_ppm', 'sufficiency.zn_ppm', 'sufficiency.na_percent', 'sufficiency.cl_percent'])
 		                 ->all();
 
 		// one test method of removing the escape character
@@ -90,7 +90,7 @@ class SufficiencyController extends Controller{
 		/// THESE ARE THE CURRENT ELEMENT FIELDS IN THE SUFFICIENCY FORM
 		$optional_fields = ['nPercent' => 'n_percent', 'no3PPM'=>'no3_ppm', 'pPercent'=>'p_percent', 'po4PPM'=>'po4_ppm',
 		                    'kPercent'=>'k_percent', 'caPercent'=>'ca_percent', 'mgPercent'=>'mg_percent', 'sPercent'=>'s_percent', 'bPPM'=>'b_ppm', 'cuPPM'=>'cu_ppm',
-							'fePPM'=>'fe_ppm', 'mnPPM'=>'mn_ppm', 'znPPM'=>'zn_ppm', 'naPercent'=>'na_percent', 'ciPercent'=>'ci_percent'];
+							'fePPM'=>'fe_ppm', 'mnPPM'=>'mn_ppm', 'znPPM'=>'zn_ppm', 'naPercent'=>'na_percent', 'clPercent'=>'cl_percent'];
 
 		if($request->growthStageId === '? undefined:undefined ?'){
 			$request->growthStageId = 0;
@@ -165,7 +165,7 @@ class SufficiencyController extends Controller{
 		/// THESE ARE THE CURRENT ELEMENT FIELDS IN THE SUFFICIENCY FORM
 		$optional_fields = ['nPercent' => 'n_percent', 'no3PPM'=>'no3_ppm', 'pPercent'=>'p_percent', 'po4PPM'=>'po4_ppm',
 		                    'kPercent'=>'k_percent', 'caPercent'=>'ca_percent', 'mgPercent'=>'mg_percent', 'sPercent'=>'s_percent', 'bPPM'=>'b_ppm', 'cuPPM'=>'cu_ppm',
-		                    'fePPM'=>'fe_ppm', 'mnPPM'=>'mn_ppm', 'znPPM'=>'zn_ppm', 'naPercent'=>'na_percent', 'ciPercent'=>'ci_percent'];
+		                    'fePPM'=>'fe_ppm', 'mnPPM'=>'mn_ppm', 'znPPM'=>'zn_ppm', 'naPercent'=>'na_percent', 'clPercent'=>'cl_percent'];
 
 		if($request->growthStageId === '? undefined:undefined ?'){
 			$request->growthStageId = 0;
