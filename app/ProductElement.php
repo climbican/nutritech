@@ -11,6 +11,7 @@ class ProductElement extends Model
         'product_id',
         'element_id',
         'percent',
+	    'is_guaranteed_amt',
         'weight',
         'create_dte',
         'last_update'];

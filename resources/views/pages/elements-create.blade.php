@@ -18,17 +18,28 @@
                 <form name="create_element_item" method="post" action="{{url('')}}/admin/element/save">
                     {!! csrf_field() !!}
                     <div class="card-body card-padding">
-                        <div class="form-group fg-float m-b-30 fg-toggled"
-                             ng-class="{ 'has-error' : (create_element_item.elementName.$invalid && !create_element_item.elementName.$pristine) || create_element_item.elementName.$touched && create_element_item.elementName.$invalid}">
-                            <div class="fg-line">
-                                <input type="text" name="elementName" ng-model="elementName"
-                                       class="form-control fg-input"
-                                       ng-minlength="1" ng-maxlength="45">
-                                <label class="fg-label">Element Name</label>
+                        <div class="row">
+                            <div class="col-md-3 m-b-20">
+                                <div class="toggle-switch" data-ts-color="blue">
+                                    <label for="ts3" class="ts-label">Is visible on Nutrients list</label>
+                                    <input id="isVisible" name="isVisible" type="checkbox" hidden="hidden" value="1" checked>
+                                    <label for="isVisible" class="ts-helper"></label>
+                                </div>
                             </div>
-                            <div ng-messages="create_element_item.elementName.$error" ng-show="create_element_item.elementName.$dirty">
-                                <small class="help-block" ng-message="minlength">This too short</small>
-                                <small class="help-block" ng-message="maxlength">Sorry we can only take 45 characters</small>
+                            <div class="col-md-6">
+                                <div class="form-group fg-float m-b-30 fg-toggled"
+                                     ng-class="{ 'has-error' : (create_element_item.elementName.$invalid && !create_element_item.elementName.$pristine) || create_element_item.elementName.$touched && create_element_item.elementName.$invalid}">
+                                    <div class="fg-line">
+                                        <input type="text" name="elementName" ng-model="elementName"
+                                               class="form-control fg-input"
+                                               ng-minlength="1" ng-maxlength="45">
+                                        <label class="fg-label">Element Name</label>
+                                    </div>
+                                    <div ng-messages="create_element_item.elementName.$error" ng-show="create_element_item.elementName.$dirty">
+                                        <small class="help-block" ng-message="minlength">This too short</small>
+                                        <small class="help-block" ng-message="maxlength">Sorry we can only take 45 characters</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

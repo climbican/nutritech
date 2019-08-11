@@ -261,27 +261,6 @@ ledgedogAdmin
 
                 });
         };
-        /**
-         * THIS FUNCTION IS JUST TO EXPORT THE DATA TO THE
-         * MOBILE APP
-         */
-        $scope.getProductList = function(){
-            $http({
-                method: 'POST',
-                url:  $scope.urlBase + 'admin/product/list',
-                timeout: 4000,
-                headers: {'Content-Type': 'application/json'}
-            })
-                .then(function(response){
-                    //remove the image from the UI ?? innerHTML
-                });
-
-        };
-        /**
-         *   this is for fetching the JSON data for the app
-         *   $scope.getProductList();
-         */
-        $scope.getProductList();
     })
 
     // =========================================================================

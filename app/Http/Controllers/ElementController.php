@@ -10,7 +10,7 @@ use DB;
 
 class ElementController extends Controller{
     public function __construct(){
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     public function index(){
@@ -26,14 +26,17 @@ class ElementController extends Controller{
      * @return string
      */
     public function fetchList(){
-        $result = [];
+        $fields = [];
         $items = Element::all();
 
         foreach($items as $item) {
-            array_push($result, array('id'=>$item->id, 'name'=>$item->element_name, 'chemName'=>$item->chemical_name, 'deficiencyText'=>$item->deficiency, 'benefitsText'=>$item->benefits, 'showFlag'=>$item->show_flag)) ; //'symbol'=>$item->symbol,  future use
+            array_push($fields, array('id'=>$item->id, 'name'=>$item->element_name, 'chemName'=>$item->chemical_name, 'deficiencyText'=>$item->deficiency, 'benefitsText'=>$item->benefits, 'showFlag'=>$item->show_flag)) ; //'symbol'=>$item->symbol,  future use
         }
 
-        return json_encode($result);
+	    $fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
+	    $fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
+
+        return view('pages.elements_json', compat('fields'));
     }
     //CREATE NEW COMPATIBILITY
     public function create(){
@@ -41,6 +44,7 @@ class ElementController extends Controller{
     }
     //ADD NEW COMPATIBILITY TO DATABASE
     public function save(Request $request){
+    	$params_to_save = [];
         $this->validate($request,[
             'symbol'=>'min:3|max:50',
             'elementName'=>'min:1|max:45|required',
@@ -54,17 +58,23 @@ class ElementController extends Controller{
         $element['element_name'] = '';
         $element['element_desc'] = '';
 
-        if(isset($element['elementName']) && $element['elementName'] != ''){ $element['element_name'] = $element['elementName']; }
-        if(isset($element['chemicalName']) && $element['chemicalName'] != ''){ $element['chemical_name'] = $element['chemicalName']; }
-        if(isset($element['elementDesc']) && $element['elementDesc'] != ''){ $element['element_desc'] = $element['elementDesc']; }
-        if(isset($element['benefitsText']) && $element['benefitsText'] != ''){$element['benefits'] = $element['benefitsText'];}
-        if(isset($element['deficiencyText']) && $element['deficiencyText'] != ''){$element['deficiency'] = $element['deficiencyText'];}
+        if(isset($element['elementName']) && $element['elementName'] != ''){ $params_to_save['element_name'] = $element['elementName']; }
+        if(isset($element['chemicalName']) && $element['chemicalName'] != ''){ $params_to_save['chemical_name'] = $element['chemicalName']; }
+        if(isset($element['elementDesc']) && $element['elementDesc'] != ''){ $params_to_save['element_desc'] = $element['elementDesc']; }
+        if(isset($element['benefitsText']) && $element['benefitsText'] != ''){$params_to_save['benefits'] = $element['benefitsText'];}
+        if(isset($element['deficiencyText']) && $element['deficiencyText'] != ''){$params_to_save['deficiency'] = $element['deficiencyText'];}
+        // param to show in app window
+        if(isset($element['isVisible']) && $element['isVisible'] !== ''){ $params_to_save['show_flag'] = $element['isVisible']; }
+        else{$params_to_save['show_flag'] = 0;}
+        // version 3.x
+	    //if(isset($element['nutrientGroup']) && $element['nutrientGroup'] !== ''){ $params_to_save['nutrient_group'] = $element['nutrientGroup']; }
+	    //if(isset($element['atomicNumber']) && $element['atomicNumber'] !== ''){ $params_to_save['atomic_number'] = $element['atomicNumber']; }
 
         $element['added_by'] = Auth::user()->id;
         $element['create_dte'] = time();
         $element['last_update'] = time();
 
-        Element::create($element);
+        Element::create($params_to_save);
         \Session::flash('flash_message', 'Successfully created an Element!');
         //will need  a proper response here
         //return response()->json($element);
@@ -79,7 +89,6 @@ class ElementController extends Controller{
 
     public function update(Request $request, $id){
         $element = Element::find($id);
-
         $this->validate($request,[
             'symbol'=>'min:3|max:50',
             'elementName'=>'min:1|max:45|required',
@@ -93,8 +102,10 @@ class ElementController extends Controller{
         if(isset($validated['elementDesc']) && $validated['elementDesc'] != ''){ $element->element_desc = $validated['elementDesc']; }
         if(isset($validated['benefitsText']) && $validated['benefitsText'] != ''){$element['benefits'] = $validated['benefitsText'];}
         if(isset($validated['deficiencyText']) && $validated['deficiencyText'] != ''){$element['deficiency'] = $validated['deficiencyText'];}
+	    if(isset($element['isVisible']) && $element['isVisible'] !== ''){ $element['show_flag'] = $validated['isVisible']; }
+	    else{$element['show_flag'] = 0;}
 
-        $element->last_update_by = Auth::user()->id;
+	    $element->last_update_by = Auth::user()->id;
         $element->last_update = time();
         $element->save();
         \Session::flash('flash_message', 'Successfully updated this Element!');

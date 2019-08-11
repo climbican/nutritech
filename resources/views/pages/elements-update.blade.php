@@ -19,21 +19,31 @@
                 <form name="update_element_item" method="post" action="{{url('admin/element/update/'.$element->id)}}">
                     {!! csrf_field() !!}
                     <div class="card-body card-padding">
-                        <div class="form-group m-b-30 fg-toggled"
-                             ng-class="{ 'has-error' : (update_element_item.elementName.$invalid && !update_element_item.elementName.$pristine) || update_element_item.elementName.$touched && update_element_item.elementName.$invalid}">
-                            <div class="fg-line">
-                                <label class="fg-label">Element Name</label>
-                                <input type="text" name="elementName" ng-model="elementName"
-                                       class="form-control fg-input"
-                                       ng-minlength="3" ng-maxlength="45"
-                                       ng-init="elementName='{{ $element->element_name}}'">
+                        <div class="row">
+                            <div class="col-md-3 m-b-20">
+                                <div class="toggle-switch" data-ts-color="blue">
+                                    <label for="ts3" class="ts-label">Is visible on Nutrients list</label>
+                                    <input id="isVisible" name="isVisible" type="checkbox" hidden="hidden" value="1" @if($element->show_flag) checked @endif>
+                                    <label for="isVisible" class="ts-helper"></label>
+                                </div>
                             </div>
-                            <div ng-messages="update_element_item.elementName.$error" ng-show="update_element_item.elementName.$dirty">
-                                <small class="help-block" ng-message="minlength">This too short</small>
-                                <small class="help-block" ng-message="maxlength">Sorry we can only take 45 characters</small>
+                            <div class="col-md-6">
+                                <div class="form-group m-b-30 fg-toggled"
+                                     ng-class="{ 'has-error' : (update_element_item.elementName.$invalid && !update_element_item.elementName.$pristine) || update_element_item.elementName.$touched && update_element_item.elementName.$invalid}">
+                                    <div class="fg-line">
+                                        <label class="fg-label">Element Name</label>
+                                        <input type="text" name="elementName" ng-model="elementName"
+                                               class="form-control fg-input"
+                                               ng-minlength="3" ng-maxlength="45"
+                                               ng-init="elementName='{{ $element->element_name}}'">
+                                    </div>
+                                    <div ng-messages="update_element_item.elementName.$error" ng-show="update_element_item.elementName.$dirty">
+                                        <small class="help-block" ng-message="minlength">This too short</small>
+                                        <small class="help-block" ng-message="maxlength">Sorry we can only take 45 characters</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
                         <div class="form-group m-b-30 fg-toggled"
                              ng-class="{ 'has-error' : (update_element_item.chemicalName.$invalid && !update_element_item.chemicalName.$pristine) || update_element_item.chemicalName.$touched && update_element_item.chemicalName.$invalid}">
                             <div class="fg-line">

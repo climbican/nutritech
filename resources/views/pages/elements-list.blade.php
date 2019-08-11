@@ -40,6 +40,7 @@
                                     <small class="lv-small" style="font-size:120%;">{{ substr($elem->element_desc, 0, 200) }}</small>
                                     <ul class="lv-attrs">
                                     <!--<li style="width:190px;">Symbol: {{$elem->symbol}}</li>-->
+                                        <li><strong>Show on App :</strong> @if($elem->show_flag)Yes @else No @endif</li>
                                         <li style="width: 190px;">Chemical ID:  {{$elem->chemical_name}}</li>
                                         <li>Date Created: {{date('Y/m/d',substr($elem->create_dte,0,10) )}}</li>
                                         <li>Last Update: {{date('Y/m/d', substr($elem->last_update,0,10) )}}</li>

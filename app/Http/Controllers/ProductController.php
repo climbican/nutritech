@@ -37,7 +37,41 @@ class ProductController extends Controller{
 
         return view('pages.product-list', compact('products', 'numRows'));
     }
+	public function fetch_all_prod_page() {
 
+		$items  = Product::all();
+		$fields = array();
+		$patterns = array();
+		$patterns[0] = '/\r/';
+		$patterns[1] = '/\n/';
+
+		foreach($items as $item) {
+			$prod = []; //p.product_id,
+			$pe = DB::select('SELECT e.element_name, p.element_id, p.percent, p.is_guaranteed_amt
+            FROM product_element p 
+            INNER JOIN element e 
+            ON p.element_id = e.id
+            WHERE p.product_id = ?', [$item->id]);
+
+			$prod['id'] = $item->id;
+			$prod['productName'] = $item->product_name;
+			$prod['imageUrl'] = $item->image_url;
+			$prod['subTitle'] = $item->product_subname;
+			$prod['description'] = preg_replace($patterns, '', $item->description);
+			$prod['dilution'] = preg_replace($patterns, '', $item->dilution);
+			$prod['benefits'] = preg_replace($patterns, '', $item->benefits);
+			$prod['compatibility'] = $item->compatibility;
+			$prod['netContents'] = $item->net_contents;
+			$prod['elements'] = $pe;
+
+			array_push($fields, $prod);
+		} //end foreach
+
+		$fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
+		$fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
+
+		return view('pages.product_json', compact('fields'));
+	}
 	/**
 	 * @desc I USED THIS TO EXPORT DATA TO THE APP.  Now it will be used for the API as well.
 	 * @return false|string
@@ -45,9 +79,13 @@ class ProductController extends Controller{
     public function fetchList(){
         $items  = Product::all();
         $fields = array();
+	    $patterns = array();
+	    $patterns[0] = '/\r/';
+	    $patterns[1] = '/\n/';
+
         foreach($items as $item) {
             $prod = []; //p.product_id,
-            $pe = DB::select('SELECT e.element_name, p.element_id, p.percent
+            $pe = DB::select('SELECT e.element_name, p.element_id, p.percent, p.is_guaranteed_amt
             FROM product_element p 
             INNER JOIN element e 
             ON p.element_id = e.id
@@ -57,9 +95,9 @@ class ProductController extends Controller{
             $prod['productName'] = $item->product_name;
             $prod['imageUrl'] = $item->image_url;
             $prod['subTitle'] = $item->product_subname;
-            $prod['description'] = $item->description;
-            $prod['dilution'] = $item->dilution;
-            $prod['benefits'] = $item->benefits;
+            $prod['description'] = preg_replace($patterns, '', $item->description);
+            $prod['dilution'] = preg_replace($patterns, '', $item->dilution);
+            $prod['benefits'] = preg_replace($patterns, '', $item->benefits);
             $prod['compatibility'] = $item->compatibility;
             $prod['netContents'] = $item->net_contents;
             $prod['elements'] = $pe;
@@ -67,7 +105,10 @@ class ProductController extends Controller{
             $fields[$item->id] = $prod;
         } //end foreach
 
-        return json_encode($fields);
+	    echo  stripslashes(json_encode($fields)); exit();
+
+
+        return json_encode(['status'=>200, 'message'=>'Your list of Products', 'list'=>$fields]);
     }
 
     /**
@@ -92,6 +133,7 @@ class ProductController extends Controller{
             'description' => 'required']);
 
         $validated = $request->all();
+
 
         $product = new Product();
 

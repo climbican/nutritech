@@ -30,7 +30,7 @@
                                                 name="cropID"
                                                 data-placeholder="Select a Crop..." class="w-100" focus required>
                                             @foreach($crops as $e)
-                                                <option value="{{$e->id}}">{{$e->name}}</option>
+                                                <option value="{{$e->id}}">{{$e->name}} @if( (strtolower($e->sub_type) !== 'general') && (strtolower($e->sub_type) !== 'none') && $e->sub_type !== '') ({{$e->sub_type}}) @endif</option>
                                             @endforeach
                                         </select>
                                     </div>

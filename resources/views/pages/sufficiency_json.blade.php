@@ -11,7 +11,6 @@
         pullJson.open('GET','{{url('admin/sufficiency/json_data')}}');
         pullJson.setRequestHeader("Content-Type", "application/json; charset=UTF8");
         pullJson.onreadystatechange = function () {
-            console.log('got thi sfar');
             if (pullJson.readyState === 4) {
                 const p = JSON.parse(pullJson.responseText);
                 const t = JSON.stringify(p.list);

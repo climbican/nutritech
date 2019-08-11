@@ -29,7 +29,9 @@
                                         <li>
                                             <a href="{{url('')}}/admin/product/create">Add New Product</a>
                                         </li>
-                                        <li><a href="{{url('')}}/admin/product/list">List All</a>
+                                        <li><a href="{{url('')}}/admin/product/list">List All</a></li>
+                                        <li>
+                                            <a href="{{url('admin/product/json-list')}}">Export for App</a>
                                         </li>
                                     </ul>
                                 </li>

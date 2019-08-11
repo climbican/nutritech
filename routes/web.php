@@ -27,9 +27,8 @@ Route::get('logout', function(){
 });
 
 Route::get('/home', 'HomeController@index')->name('home');
-
+// PRODUCTS
 Route::get('admin/product/list', 'ProductController@index');
-Route::post('admin/product/list', 'ProductController@fetchList');
 Route::get('admin/product/create', 'ProductController@create');
 Route::post('admin/product/save', 'ProductController@save');
 Route::get('admin/product/update/{id}', 'ProductController@updateForm');
@@ -37,6 +36,10 @@ Route::post('admin/product/update/{id}', 'ProductController@update');
 Route::get('admin/product/delete/{id}', 'ProductController@delete');
 Route::get('admin/product/lookup/{id}', 'ProductController@autoComplete');
 Route::post('admin/product/elements/lookup/{id}', 'ProductController@fetchProductElements');
+// TODO: LEFT OFF HERE.....
+Route::get('admin/product/json-list', 'ProductController@fetch_all_prod_page');
+// this one just pulls the data via AJAX
+Route::get('admin/product/json_data/', 'ProductController@fetchList');
 //CROPS
 Route::get('admin/crop/list', 'CropController@index');
 Route::post('admin/crop/list', 'CropController@fetchList');

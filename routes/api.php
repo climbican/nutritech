@@ -16,3 +16,15 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+// USER ROUTES FOR ADDING DEFICIENCIES
+// need to secure this one.
+Route::post( 'community/add/deficiency/image', 'DeficiencyController@add_new_image' );
+Route::get('user/app/deficiency/fetch/all', 'DeficiencyController@fetchList');
+Route::get('user/app/deficiency/fetch/single/{id}', 'DeficiencyController@fetchDeficiency');
+
+
+Route::group(['namespace' => 'api'], function () {
+	Route::get('user/app/crop/fetch/list', 'CropApiController@fetchAppList');
+});
