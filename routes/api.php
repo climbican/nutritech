@@ -24,7 +24,7 @@ Route::post( 'community/add/deficiency/image', 'DeficiencyController@add_new_ima
 Route::get('user/app/deficiency/fetch/all', 'DeficiencyController@fetchList');
 Route::get('user/app/deficiency/fetch/single/{id}', 'DeficiencyController@fetchDeficiency');
 
-
 Route::group(['namespace' => 'api'], function () {
-	Route::get('user/app/crop/fetch/list', 'CropApiController@fetchAppList');
+	Route::get('user/app/crop/fetch/list', 'CropApiController@fetchAppList'); //production
+	//Route::get('user/app/crop/fetch/list', array('middleware' => 'cors', 'uses' => 'CropApiController@fetchAppList'));
 });

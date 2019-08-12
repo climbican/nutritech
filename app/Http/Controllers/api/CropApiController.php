@@ -38,6 +38,6 @@ class CropApiController{
 		$crop_query = 'select DISTINCT (c.id), c.name, c.sub_type as subType, c.image_url as imgUrl from crop c inner join deficiency d on d.crop_id = c.id;';
 		$result = DB::select(DB::raw($crop_query));
 
-		return json_encode(['status'=> 200, 'message'=>'crop list', 'croLists'=>$result]);
+		return json_encode(['status'=> 200, 'message'=>'crop list', 'cropsList'=>$result]);
 	}
 }
