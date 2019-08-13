@@ -27,10 +27,8 @@
 namespace App\Http\Controllers;
 // MODELS
 use Illuminate\Http\Request;
-use App\Crop;
 use App\Element;
 use App\Deficiency;
-use App\ImageStore;
 use DB;
 use Auth;
 use Illuminate\Support\Facades\Session;
@@ -42,7 +40,7 @@ class DeficiencyController extends Controller{
 	private $image_name;
 
 	public function __construct(){
-		// $this->middleware('auth');
+		$this->middleware('auth');
 	}
 
 	/**
@@ -276,78 +274,5 @@ class DeficiencyController extends Controller{
 		}
 		$d->delete();
 		return redirect('admin/deficiency/list');
-	}
-
-	/**
-	 * @desc add new image which needs approval
-	 * @param Request $request JSON {imageData:base64, deficiencyId:number, ?name:string, ?descriptor:string, ?deficiencyTraits}
-	 * @return string - containing status of request
-	 */
-	public function add_new_image(Request $request) : string {
-		//bounce back info for now
-		$id = $request->input('deficiencyId');  // this works
-		$image = $request->input('imageData');
-		// validate that the deficiency exists
-		$def = Deficiency::find($id);
-
-		//FIRST LET'S MAKE SURE THE DATA IS VALID OR AS MUCH SO AS POSSIBLE.
-		if(!isset($def->name_short) || $def->name_short === '') {
-			return json_encode(['status'=> 400, 'message'=>'There was an issue with the request']);
-		}
-
-		if( !substr( $image, 0, 5 ) === "data:" ){
-			return json_encode(['status'=> 400, 'message'=>'Invalid data format.']);
-		}
-
-		if(!$this->save_base64_image($image, $def->name_short)) {
-			return ['status'=>400, 'message'=>'There was an issue while saving the uploaded image'];
-		}
-
-		// save image to database New Image Store
-		$nis = new ImageStore();
-		$nis->link_table = 'deficiency';
-		$nis->linked_table_id = $def->id;
-		$nis->image_name = $this->image_name;
-		$nis->active = false;
-		$nis->create_dte = time();
-		$nis->create_by = 999; // current temp code for user generated image
-		$nis->last_update = time();
-		$nis->last_update_by = 999;
-
-		// save the new image
-		$nis->save();
-
-		return json_encode(['status'=>200, 'message'=>'Deficiency image successfully added.']);
-	}
-
-	/**
-	 * @desc CONVERT BASE 64 IMAGE TO JUST IMAGE :)
-	 *
-	 * NOTE: future feature would be to add thumbnail
-	 *
-	 * @param string $base64_image_string
-	 * @param string $output_file_name_without_extension
-	 *
-	 * @return bool
-	 */
-	private final function save_base64_image(string $base64_image_string, string $output_file_name_without_extension): bool{
-		$splited = explode(',', substr( $base64_image_string , 5 ) , 2);
-		$mime=$splited[0];
-		$data=$splited[1];
-
-		$mime_split_without_base64=explode(';', $mime,2);
-		$mime_split=explode('/', $mime_split_without_base64[0],2);
-		if(count($mime_split)==2) {
-			$extension=$mime_split[1];
-			if($extension=='jpeg')$extension='jpg';
-			$img_name = substr(sha1(preg_replace("/[^ \w]+/", '',time().$output_file_name_without_extension ) ), 0, 40);
-			$this->image_name = $img_name.'.'.$extension;
-		}
-		else{
-			return false;
-		}
-		file_put_contents( base_path() . '/public/images/def/'. $this->image_name, base64_decode($data) );
-
-		return true;
 	}
 }

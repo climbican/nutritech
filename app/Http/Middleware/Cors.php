@@ -6,7 +6,10 @@ use Closure;
 class Cors
 {
 	private static $allowedOriginsWhitelist = [
-		'http://localhost:8100'
+		'https://ldgc1.ledgedog.com',
+		'https://techflo.ledgedog.com',
+		'http://localhost:8100',
+		'*'
 	];
 
 	// All the headers must be a string
