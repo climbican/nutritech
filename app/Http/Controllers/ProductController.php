@@ -38,7 +38,6 @@ class ProductController extends Controller{
         return view('pages.product-list', compact('products', 'numRows'));
     }
 	public function fetch_all_prod_page() {
-
 		$items  = Product::all();
 		$fields = array();
 		$patterns = array();
@@ -72,6 +71,61 @@ class ProductController extends Controller{
 
 		return view('pages.product_json', compact('fields'));
 	}
+
+
+	/**
+	 * @desc this is specifically for the product data table
+	 *
+	 * @return false|string
+	 */
+	public function fetch_all_prod_with_elements() {
+		$items  = Product::all();
+		$fields = array();
+		$patterns = array();
+		$patterns[0] = '/\r/';
+		$patterns[1] = '/\n/';
+
+		foreach($items as $item) {
+			$prod = []; //p.product_id,
+			$product_elements = DB::select('SELECT A.id, A.chemical_name, B.*
+								    FROM element A
+								LEFT OUTER JOIN (SELECT  p.element_id, p.percent, p.is_guaranteed_amt
+								FROM product_element p
+								         INNER JOIN element e
+								                    ON p.element_id = e.id
+								WHERE p.product_id = ?) AS B
+								    ON A.ID = B.element_id
+								WHERE A.id IN (15, 3, 18, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)', [$item->id]);
+
+			foreach($product_elements as $pe) {
+				if(is_null($pe->percent) || $pe->percent === NULL || $pe->percent == ''){
+					$prod[strtolower($pe->chemical_name)] = '-';
+				}
+				else { $prod[strtolower($pe->chemical_name)] = $pe->percent; }
+			}
+
+			$prod['productId'] = $item->id;
+			$prod['productName'] = $item->product_name;
+			$prod['imageUrl'] = $item->image_url;
+
+			array_push($fields, $prod);
+		} //end foreach
+
+		$fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
+		$fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
+
+		//return json_encode($fields);
+		return view('pages.products_json', compact('fields'));
+	}
+
+
+
+
+
+
+
+
+
 	/**
 	 * @desc I USED THIS TO EXPORT DATA TO THE APP.  Now it will be used for the API as well.
 	 * @return false|string

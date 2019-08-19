@@ -26,14 +26,17 @@
 
 namespace App\Http\Controllers;
 // MODELS
+use Faker\Provider\Image;
 use Illuminate\Http\Request;
 use App\Element;
 use App\Deficiency;
+use App\ImageStore;
 use DB;
 use Auth;
 use Illuminate\Support\Facades\Session;
 use File;
 use App\Http\Controllers\boolean;
+use Illuminate\Support\Facades\Log;
 
 class DeficiencyController extends Controller{
 	// name of the uploaded deficiency image
@@ -274,5 +277,64 @@ class DeficiencyController extends Controller{
 		}
 		$d->delete();
 		return redirect('admin/deficiency/list');
+	}
+
+	/**
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 *
+	 * Query format
+	 * select *
+	 *	from image_store i
+	 *	inner join deficiency d
+	 *	on i.linked_table_id = d.id
+	 *	inner join crop c
+	 *	on c.id = d.crop_id;
+	 */
+	public function deficiencyImagelist() {
+		$query = 'select i.id, i.image_name, d.name_short, d.deficiency_description, c.name AS crop_name, c.sub_type AS sub_type 
+				  from image_store i 
+				  inner join deficiency d on i.linked_table_id = d.id 
+				  inner join crop c on c.id = d.crop_id';
+		$newImages = DB::select($query);
+		$numRows = ImageStore::count();
+
+		return view('pages.deficincy-new-images', compact('newImages', 'numRows'));
+	}
+
+	/**
+	 * @desc this is a TEMPORARY image approval system, it works for now.
+	 *
+	 * @param number $id
+	 *
+	 * @throws \Exception
+	 */
+	public function approveImage($id){
+		$d = ImageStore::find($id);
+		$def = Deficiency::find($d->linked_table_id);
+		for($i=1; $i<5; $i++){
+			$inc = 'image_'.$i;
+			if(is_null($def->$inc) || $def->$inc === '' || $def->$inc === NULL){
+				$def->$inc = $d->image_name;
+				break;
+			}
+		}
+		$def->save();
+		if($i < 5){
+			ImageStore::destroy($id);
+			Session::flash('flash_message', 'Successfully add the image to position '.$i);
+		}
+		else{
+			Session::flash('flash_message', 'There are already 4 images associated with this deficiency, please remove an existing image.');
+		}
+		return redirect('admin/deficiency/community_images');
+	}
+
+	public function remove_community_image($id){
+		$image = ImageStore::find($id);
+		//remove image from disk as well
+		unlink(public_path('images/def/'.$image->image_name));
+		$image->delete();
+		Session::flash('flash_message', 'Successfully removed image');
+		return redirect('admin/deficiency/community_images');
 	}
 }

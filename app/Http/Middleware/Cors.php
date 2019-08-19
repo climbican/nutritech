@@ -47,11 +47,11 @@ class Cors
 			'Access-Control-Allow-Methods'      => static::$allowedMethods,
 			'Access-Control-Allow-Headers'      => static::$allowedHeaders,
 			'Access-Control-Allow-Credentials'  => static::$allowCredentials,
+			'Access-Control-Max-Age'            => '1000'
 		];
 
 		// For preflighted requests
-		if ($request->getMethod() === 'OPTIONS')
-		{
+		if ($request->getMethod() === 'OPTIONS') {
 			return response('', 200)->withHeaders($headers);
 		}
 

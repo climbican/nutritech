@@ -10,7 +10,6 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 Route::get('/', function () {
 	return redirect('/login');
 });
@@ -36,7 +35,7 @@ Route::post('admin/product/update/{id}', 'ProductController@update');
 Route::get('admin/product/delete/{id}', 'ProductController@delete');
 Route::get('admin/product/lookup/{id}', 'ProductController@autoComplete');
 Route::post('admin/product/elements/lookup/{id}', 'ProductController@fetchProductElements');
-// TODO: LEFT OFF HERE.....
+Route::get('admin/product/all/element/chart/data', 'ProductController@fetch_all_prod_with_elements');
 Route::get('admin/product/json-list', 'ProductController@fetch_all_prod_page');
 // this one just pulls the data via AJAX
 Route::get('admin/product/json_data/', 'ProductController@fetchList');
@@ -75,7 +74,11 @@ Route::post('admin/deficiency/save', 'DeficiencyController@save');
 Route::get('admin/deficiency/update/{id}', 'DeficiencyController@updateForm');
 Route::post('admin/deficiency/update/{id}', 'DeficiencyController@update');
 Route::get('admin/deficiency/delete/{id}',  'DeficiencyController@delete');
-Route::post('admin/deficiency/remove/image/{number}/{id}', 'DeficiencyController@removeImage');
+Route::get('admin/deficiency/remove/image/{number}/{id}', 'DeficiencyController@removeImage');
+
+Route::get('admin/deficiency/community_images', 'DeficiencyController@deficiencyImagelist');
+Route::get('admin/deficiency/community_image/approve/{id}',  'DeficiencyController@approveImage');
+Route::get('admin/deficiency/community_image/delete/{id}',  'DeficiencyController@remove_community_image');
 
 //SUFFICIENCY
 Route::get('admin/sufficiency/list', 'SufficiencyController@index');

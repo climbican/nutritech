@@ -21,7 +21,7 @@
  * Date: 8/5/19
  * Time: 2:35 PM
  * Last Mod:
- * Notes:  TODO : NEED TO MAKE THE WHOLE IMAGE DYNAMIC, THIS IS TOO MUCH WORK.
+ * Notes:  TODO : NEED TO MAKE THE WHOLE IMAGE DYNAMIC, THIS IS TOO MUCH WORK.  This needs to be updated with the code from the server!!!!!!
  */
 
 namespace App\Http\Controllers\api;
@@ -30,6 +30,7 @@ use App\Deficiency;
 use App\ImageStore;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DeficiencyApiController{
 	public function __construct() {}
@@ -52,9 +53,15 @@ class DeficiencyApiController{
 	 * @return string - containing status of request
 	 */
 	public function add_new_image(Request $request) : string {
+		//Log::info('what the shit');
+		//Log::info('wtf>>> '.print_r(file_get_contents('php://input'), true));
 		//bounce back info for now
-		$id = $request->input('deficiencyId');  // this works
-		$image = $request->input('imageData');
+		$tmp = json_decode(file_get_contents('php://input'));
+		//echo 'value of  id>>>'.$tmp->deficiencyId;
+		// CORS IS NOT PLAYING NICE SO I HAD TO USE PLAIN/TEXT ON THE REQUEST BODY
+		// THE RESULT IS THAT LARAVEL DOES NOT RECOGNIZE IT AS JSON... MAKES SENSE.
+		$id = $tmp->deficiencyId;// $request->input('deficiencyId');  // this works
+		$image = $tmp->imageData; // $request->input('imageData');
 		// validate that the deficiency exists
 		$def = Deficiency::find($id);
 

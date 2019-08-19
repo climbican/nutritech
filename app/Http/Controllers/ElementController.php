@@ -33,11 +33,15 @@ class ElementController extends Controller{
             array_push($fields, array('id'=>$item->id, 'name'=>$item->element_name, 'chemName'=>$item->chemical_name, 'deficiencyText'=>$item->deficiency, 'benefitsText'=>$item->benefits, 'showFlag'=>$item->show_flag)) ; //'symbol'=>$item->symbol,  future use
         }
 
-	    $fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
-	    $fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
+	    //$fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
+	    //$fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
 
-        return view('pages.elements_json', compat('fields'));
+        //return view('pages.elements_json', compact('fields'));
+	    return json_encode($fields);
     }
+
+
+
     //CREATE NEW COMPATIBILITY
     public function create(){
         return view('pages.elements-create');

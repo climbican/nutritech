@@ -37,17 +37,15 @@
                         </div>
                         <div class="lv-body">
                             <!--repeater section-->
-                            @foreach ($def as $deficiency)
+                            @foreach ($newImages as $deficiency)
                                 <div class="lv-item media">
                                     <div class="pull-left">
-                                        <img class="lv-img" src="{{url('images/def'.'/'.$deficiency->image_1)}}" alt="crop image"/>
+                                        <img src="{{url('images/def'.'/'.$deficiency->image_name)}}" alt="crop image" style="height:100px;"/>
                                     </div>
-                                    <div class="lv-title">Name Short:  {{$deficiency->name_short}} </div>
+                                    <div class="lv-title">Deficiency Name:  {{$deficiency->name_short}} </div>
                                     <div class="lv-title">Desc: {{substr($deficiency->deficiency_description, 0, 100)}}</div>
                                     <ul class="lv-attrs">
-                                        <li style="width: 190px;">For Crop:  {{$deficiency->crop_name}}</li>
-                                        <li>Date Created: {{date('Y/m/d',substr($deficiency->create_dte,0,10) )}}</li>
-                                        <li>Last Update: {{date('Y/m/d', substr($deficiency->last_update,0,10) )}}</li>
+                                        <li style="width: 190px;">Crop Name:  {{$deficiency->crop_name}}</li>
                                     </ul>
                                     <div class="lv-actions actions dropdown" uib-dropdown>
                                         <a href="" uib-dropdown-toggle aria-expanded="true">
@@ -55,10 +53,10 @@
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right">
                                             <li>
-                                                <a href="{{url('')}}/admin/deficiency/update/{{$deficiency->id}}">Edit</a>
+                                                <a href="{{url('admin/deficiency/community_image/approve/'.$deficiency->id)}}" onclick="return confirm('Are you sure you want to associate this image?')">Approve</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('')}}/admin/deficiency/delete/{{$deficiency->id}}">Delete</a>
+                                                <a href="{{url('admin/deficiency/community_image/delete/'.$deficiency->id)}}" onclick="return confirm('Are you sure you want to remove the image?')">Delete</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -66,13 +64,13 @@
                             @endforeach
 
                             @if($numRows > 0)
-                                <div class="text-center">{{$def->links()}}  &nbsp; <span style="margin-left:4%; padding-top:20px;">Total {{$numRows}}</span></div>
+                                <div class="text-center"><span style="margin-left:4%; padding-top:20px;">Total {{$numRows}}</span></div>
                             @endif
 
                             @if($numRows < 1)
                                 <div class="row">
                                     <div class="col-lg-12 text-center">
-                                        <h3>You have no Deficiency Associations Listed yet</h3>
+                                        <h3>You have no Community Images added yet</h3>
                                     </div>
                                 </div>
                             @endif
