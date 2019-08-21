@@ -60,7 +60,7 @@
                                                 <a href="{{url('')}}/admin/product/update/{{$product->id}}">Edit</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('')}}/admin/product/delete/{{$product->id}}">Delete</a>
+                                                <a href="{{url('')}}/admin/product/delete/{{$product->id}}" onclick="return confirm('Are you sure you want to remove {{$product->product_name}}?')">Delete</a>
                                             </li>
                                         </ul>
                                     </div>

@@ -40,7 +40,7 @@
                             @foreach ($def as $deficiency)
                                 <div class="lv-item media">
                                     <div class="pull-left">
-                                        <img class="lv-img" src="{{url('images/def'.'/'.$deficiency->image_1)}}" alt="crop image"/>
+                                        <img class="lv-img" src="{{url('images/def/'.$deficiency->image_1)}}" alt="crop image"/>
                                     </div>
                                     <div class="lv-title">Name Short:  {{$deficiency->name_short}} </div>
                                     <div class="lv-title">Desc: {{substr($deficiency->deficiency_description, 0, 100)}}</div>
@@ -55,16 +55,15 @@
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right">
                                             <li>
-                                                <a href="{{url('')}}/admin/deficiency/update/{{$deficiency->id}}">Edit</a>
+                                                <a href="{{url('admin/deficiency/update/'.$deficiency->id)}}">Edit</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('')}}/admin/deficiency/delete/{{$deficiency->id}}">Delete</a>
+                                                <a href="{{url('admin/deficiency/delete/'.$deficiency->id)}}">Delete</a>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
                             @endforeach
-
                             @if($numRows > 0)
                                 <div class="text-center">{{$def->links()}}  &nbsp; <span style="margin-left:4%; padding-top:20px;">Total {{$numRows}}</span></div>
                             @endif

@@ -52,10 +52,10 @@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-right">
                                         <li>
-                                            <a href="{{url('')}}/admin/crop/update/{{$crop->id}}">Edit</a>
+                                            <a href="{{url('admin/crop/update/'.$crop->id)}}">Edit</a>
                                         </li>
                                         <li>
-                                            <a href="{{url('')}}/admin/crop/delete/{{$crop->id}}">Delete</a>
+                                            <a href="{{url('admin/crop/delete/'.$crop->id)}}">Delete</a>
                                         </li>
                                     </ul>
                                 </div>

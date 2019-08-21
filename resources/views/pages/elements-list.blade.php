@@ -51,10 +51,10 @@
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right">
                                             <li>
-                                                <a href="{{url('admin/element/update'.'/'.$elem->id)}}">Edit</a>
+                                                <a href="{{url('admin/element/update/'.$elem->id)}}">Edit</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('admin/element/delete'.'/'.$elem->id)}}">Delete</a>
+                                                <a href="{{url('admin/element/delete/'.$elem->id)}}"  onclick="return confirm('Are you sure you want to remove {{$product->element_name}}?')">Delete</a>
                                             </li>
                                         </ul>
                                     </div>

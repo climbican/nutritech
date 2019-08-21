@@ -117,15 +117,6 @@ class ProductController extends Controller{
 		//return json_encode($fields);
 		return view('pages.products_json', compact('fields'));
 	}
-
-
-
-
-
-
-
-
-
 	/**
 	 * @desc I USED THIS TO EXPORT DATA TO THE APP.  Now it will be used for the API as well.
 	 * @return false|string
@@ -182,14 +173,13 @@ class ProductController extends Controller{
      */
     public function save(Request $request){
         $nowTime = time();
+	    $product = new Product();
+
         $this->validate($request, ['productName' => 'max:35|unique:product,product_name|required',
             'subTitle' => 'max:25',
             'description' => 'required']);
 
         $validated = $request->all();
-
-
-        $product = new Product();
 
         $product->product_group = '';
         $product->product_name = '';
@@ -227,13 +217,14 @@ class ProductController extends Controller{
         $product->save();
 
         $product_id = $product->id;
-        $i = 0;
+	    $i = 0;
 
-        while(isset($validated['percent_'.$i]) && $validated['percent_'.$i] !==''){
+	    foreach($validated['elementList'] as $e) {
             $pe = new ProductElement();
             $pe->product_id = $product_id;
-            $pe->element_id = $validated['element_'.$i];
-            $pe->percent = $validated['percent_'.$i];
+            $pe->element_id = $e;
+            $pe->is_guaranteed_amt = $validated['guaranteedAmt'][$i];
+            $pe->percent = $validated['percentPPM'][$i];
             $pe->create_dte = $nowTime;
             $pe->last_update = $nowTime;
             $pe->save();
@@ -245,12 +236,40 @@ class ProductController extends Controller{
         return redirect('admin/product/create');
     }
 
+	/**
+	 * @param $id
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 */
+	public function updateForm($id){
+		$prod = Product::find($id);
+		$elements = Element::all();
+		$compat = Compatibility::all();
+
+		if(!file_exists(public_path('images/product/'.$prod->image_url)) || $prod->image_url === ''){
+			$prod->image_url = 'no-image.png';
+		}
+
+		$element_fields = DB::table('product_element')->where('product_id', '=', $id)->get();
+
+		$t = Product::find($id);
+
+		$prod['productName'] = $t->product_name;
+		$prod['subTitle'] = $t->product_subname;
+		$prod['description'] = $t->description;
+		$prod['dilution'] = $t->dilution;
+		$prod['benefits'] = $t->benefits;
+		$prod['compatibility'] = $t->compatibility;
+		$prod['netContents'] = $t->net_contents;
+
+		return view('pages.product-update', compact('prod', 'elements', 'compat', 'element_fields'));
+	}
+
     /**
      * @param Request $request
      * @param $id
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function update(Request $request, $id){ //echo 'what the shit'; exit();
+    public function update(Request $request, $id){
         $nowTime = time();
         $product = Product::find($id);
 
@@ -283,11 +302,12 @@ class ProductController extends Controller{
         if(isset($validated['description']) && $validated['description'] != ''){ $product->description = $validated['description']; }
         if(isset($validated['dilution']) && $validated['dilution'] != ''){ $product->dilution = $validated['dilution']; }
         if(isset($validated['benefits']) && $validated['benefits'] != ''){ $product->benefits = $validated['benefits']; }
-        if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = str_replace('number:',"",$validated['compatibilityType']);}
+        if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = $validated['compatibilityType'];}
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
         //TRACKING
 
         $product->last_update = $nowTime;
+        $product->last_update_by = Auth::user()->id;
         $product_id = $product->id;
 
         $product->save();
@@ -296,20 +316,18 @@ class ProductController extends Controller{
 
         DB::table('product_element')->where('product_id', '=', $product->id)->delete();
 
-        while(isset($validated['percent_'.$i]) && $validated['percent_'.$i] !==''){
-            $validated['percent_'.$i] = (float)$validated['percent_'.$i];
-            if($validated['percent_'.$i] > 0.001 ) {
-                $validated['element_'.$i] = str_replace('number:',"",$validated['element_'.$i]);
-                $pe = new ProductElement();
-                $pe->product_id = $product_id;
-                $pe->element_id = $validated['element_'.$i];
-                $pe->percent = $validated['percent_'.$i];
-                $pe->create_dte = $nowTime;
-                $pe->last_update = $nowTime;
-                $pe->save();
-            }
-            $i++;
-        }
+	    foreach($validated['elementList'] as $e) {
+		    $pe = new ProductElement();
+		    $pe->product_id = $product_id;
+		    $pe->element_id = $e;
+		    $pe->is_guaranteed_amt = $validated['guaranteedAmt'][$i];
+		    $pe->percent = $validated['percentPPM'][$i];
+		    $pe->create_dte = $nowTime;
+		    $pe->last_update = $nowTime;
+		    $pe->save();
+		    $i++;
+	    }
+
         Session::flash('flash_message', 'Product Successfully updated!');
 
         return redirect('admin/product/list');
@@ -330,10 +348,7 @@ class ProductController extends Controller{
         //array('element_name'=>array('name'=>'element_'.$i), 'percent_'.$i=>$p->percent)
 
         foreach ( $pe as $p){
-            /**array_push($fields, array($i+1=>[array('name'=>'element_'.$i, 'title'=>'Element', 'type'=>array('view'=>'select', 'options'=>'') ),
-                                array('name'=>'percent_'.$i, 'title'=>'Percent','type'=>array('view'=>'input')) ])  );**/
             array_push($fields, array('element_'.$i=>$p->element_id,  'percent_'.$i=> $p->percent));
-
             $i++;
         }
 
@@ -350,21 +365,6 @@ class ProductController extends Controller{
         $returnArray = ['elements'=>$fields, 'productDetail'=>$prod];
 
         return json_encode($returnArray);
-    }
-
-    /**
-     * @param $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function updateForm($id){
-        $product = Product::find($id);
-        $elements = Element::all();
-        $compat = Compatibility::all();
-
-        if(!file_exists(public_path('images/product/'.$product->image_url)) || $product->image_url === ''){
-            $product->image_url = 'no-image.png';
-        }
-        return view('pages.product-update', compact('product', 'elements', 'compat'));
     }
 
     /**
