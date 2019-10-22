@@ -197,5 +197,10 @@
     <script src="{{url('js/modules/demo.js')}}"></script>
     <script src="{{url('js/modules/ng-messages.js')}}"></script>
 
+    <!-- WYSIWIG -->
+    <script src='{{url('vendors/bower_components/wysiwyg/textAngular-rangy.min.js')}}'></script>
+    <script src='{{url('vendors/bower_components/wysiwyg/textAngular-sanitize.min.js')}}'></script>
+    <script src='{{url('vendors/bower_components/wysiwyg/textAngular.min.js')}}'></script>
+
 </body>
 </html>

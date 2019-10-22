@@ -8,7 +8,7 @@ class Product extends Model
 {
     protected $table = 'product';
     protected $fillable = ['id',
-        'product_group',
+        'product_group_id',
         'product_name',
         'product_subname',
         'product_code',
@@ -19,6 +19,7 @@ class Product extends Model
         'caution',
         'net_contents',
         'image_url',
+	    'active',
         'added_by',
         'last_update_by',
         'create_dte',

@@ -4,18 +4,19 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ImageStore extends Model
+class ProductGroup extends Model
 {
-	protected $table = 'image_store';
+	protected $table = 'product_group';
 	protected $fillable = ['id',
-		'link_table',
-		'linked_table_id',
-		'image_name',
+		'name',
+		'color_pri',
+		'color_sec',
 		'active',
-		'approved_by',
+		'product_list_visible',
+		'data_grid_visible',
 		'create_dte',
-		'create_by',
 		'last_update',
+		'create_by_id',
 		'last_update_by'];
 	public $timestamps = false;
 	protected $dateFormat = 'U';

@@ -11,11 +11,7 @@ class Deficiency extends Model
         'element_id',
         'crop_id',
         'name_short',
-        'deficiency_description',
-        'image_1',
-        'image_2',
-        'image_3',
-        'image_4'];
+        'deficiency_description'];
     public $timestamps = false;
     protected $dateFormat = 'U';
 }

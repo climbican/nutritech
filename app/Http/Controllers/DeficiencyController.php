@@ -21,7 +21,9 @@
  * Date: 8/5/19
  * Time: 2:35 PM
  * Last Mod:
- * Notes:  TODO : NEED TO MAKE THE WHOLE IMAGE DYNAMIC, THIS IS TOO MUCH WORK.
+ * Notes:
+ *
+ * TODO: CHANGE THE THUMB GENERATE IT REALLY SUCKS!!
  */
 
 namespace App\Http\Controllers;
@@ -33,14 +35,37 @@ use App\Deficiency;
 use App\ImageStore;
 use DB;
 use Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use File;
 use App\Http\Controllers\boolean;
 use Illuminate\Support\Facades\Log;
+use App\Crop;
 
 class DeficiencyController extends Controller{
 	// name of the uploaded deficiency image
 	private $image_name;
+	// Link image type to correct image loader and saver
+	// - makes it easier to add additional types later on
+	// - makes the function easier to read
+	const IMAGE_HANDLERS = [
+		IMAGETYPE_JPEG => [
+			'load' => 'imagecreatefromjpeg',
+			'save' => 'imagejpeg',
+			'quality' => 0
+		],
+		IMAGETYPE_PNG => [
+			'load' => 'imagecreatefrompng',
+			'save' => 'imagepng',
+			'quality' => 0
+		],
+		IMAGETYPE_GIF => [
+			'load' => 'imagecreatefromgif',
+			'save' => 'imagegif',
+			'quality' => 0
+		]
+	];
 
 	public function __construct(){
 		$this->middleware('auth');
@@ -48,33 +73,51 @@ class DeficiencyController extends Controller{
 
 	/**
 	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+	 *
 	 */
-	public function index(){
-		$def = Deficiency::orderBy('create_dte', 'desc')->paginate(10);
-		$numRows = Deficiency::count();
+	public function index(Request $request){
+		$query = 'SELECT d.id AS defId, d.name_short, d.deficiency_description, d.added_by, d.create_dte, d.last_update, 
+				    COALESCE(image_name, "no-image.png") AS image_name, c.name AS crop_name
+					FROM deficiency d
+					INNER JOIN crop c
+					ON d.crop_id = c.id
+					LEFT OUTER JOIN image_store
+					    ON d.id = image_store.linked_table_id
+					  GROUP BY d.id, image_name
+					ORDER BY d.id DESC;';
 
+		$def = DB::select($query);
+		$def = $this->super_unique($def, 'defId');
+		$numRows = count($def);
+
+		$i=0;
 		foreach($def as $defe){
 			//this "if" just sets image one as the default in the list
-			if(!file_exists(public_path('images/def/'.$defe->image_1)) || $defe->image_1 === ''){
-				$def->image_1 = 'no-image.png';
+			if(!file_exists(public_path('images/def/'.$defe->image_name)) || $defe->image_name === ''){
+				$def[$i]->image_name = 'no-image.png';
 			}
-			/**else{
-			if(is_null($defe->image_1) ){ $def->image_1 = 'images/no-image.png'; }
-			else{
-			$def->image_1 = 'images/def/'.$defe->image_1;
-			}
-			}**/
-			$def->crop_name = DB::table('crop')->where('id', $defe->crop_id)->value('name');
+			$i++;
 		}
+		$def = $this->arrayPaginator($def, $request);
 
 		return view('pages.deficiency-list', compact('def', 'numRows'));
 	}
 
+	function super_unique($array,$key)
+	{
+		$temp_array = [];
+		foreach ($array as &$v) {
+			if (!isset($temp_array[$v->$key]))
+				$temp_array[$v->$key] =& $v;
+		}
+		$array = array_values($temp_array);
+		return $array;
+
+	}
 	/**
 	 * @return a list of deficiencies, mostly for the mobile app, can serve as a remote fetch later
 	 *
 	 */
-
 	public function fetchList(){
 		$def = Deficiency::all();
 		$result = [];
@@ -98,6 +141,15 @@ class DeficiencyController extends Controller{
 	/**
 	 * @param Request $request
 	 * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+	 *
+	 * IMAGE STORE PARAMS COMING IN
+	 *
+	 * Array ( [images]   => Array (
+	 *                [name] => Array ( [0] => 9a02a266589b210d5ed9197911c02187.jpg [1] => e0483849ce6ce0ed7ee40010fbd465e7.jpg [2] => 2c0e3ef01a712189bcbc61ed29d611b2.jpg )
+	 *                [type]     => Array ( [0] => image/jpeg [1] => image/jpeg [2] => image/jpeg )
+	 *                [tmp_name] => Array ( [0] => /Applications/MAMP/tmp/php/phpr5liG7 [1] => /Applications/MAMP/tmp/php/phpSHIO3m [2] => /Applications/MAMP/tmp/php/phpbHLOxl )
+	 *                [error]    => Array ( [0] => 0 [1] => 0 [2] => 0 )
+	 *                [size] => Array ( [0] => 76498 [1] => 23242 [2] => 40007 ) ) )
 	 */
 	public function save(Request $request){
 		$nowTime = time();
@@ -109,18 +161,9 @@ class DeficiencyController extends Controller{
 
 		$d = new Deficiency();
 		$d->deficiency_description = '';
+		$imageReference = $_FILES['images'];
+		$num_of_images_sent = count($imageReference['name']);
 
-		for($i=1; $i<5; $i++){
-			if($request->hasFile('image'.$i)){
-				$imageTmpName = explode('.', $request->file('image'.$i)->getClientOriginalName());
-				$imageName = sha1(preg_replace("/[^ \w]+/", '',time().$imageTmpName[0] ) );
-				$field_name = 'image_'.$i;
-				//Image::make($image->getRealPath())->resize(200, 200)->save($path);
-
-				$d->$field_name = substr($imageName, 0,40).'.'.$imageTmpName[1];
-				$request->file('image'.$i)->move(base_path() . '/public/images/def/', $d->$field_name);
-			}
-		}
 		if(isset($validated['defDescription']) && $validated['defDescription'] != '' ){ $d->deficiency_description = $validated['defDescription']; }
 		$d->name_short = $validated['nameShort'];
 		$d->element_id = $validated['elementID'];
@@ -133,6 +176,29 @@ class DeficiencyController extends Controller{
 
 		$d->save();
 
+		//NOW GRAB THE ID AND ADD IMAGES TO DB STORE
+		for($i=0; $i<$num_of_images_sent; $i++){
+			if($imageReference['name'][$i] !== '' && $imageReference['size'][$i] > 100){
+				$imageTmpName = explode('.', $imageReference['name'][$i]);
+				$imageName = sha1(preg_replace("/[^ \w]+/", '',time().$imageTmpName[0] ) );
+
+				$is = new ImageStore();
+				$is->link_table = 'deficiency';
+				$is->linked_table_id = $d->id;
+				$is->active = 1;
+				$is->approved_by = Auth::user()->id;
+				$is->image_name = $imageName.'.'.$imageTmpName[1];
+				$is->create_by = Auth::user()->id;
+				$is->last_update_by = Auth::user()->id;
+				$is->create_dte = $nowTime;
+				$is->last_update = $nowTime;
+				//should be checking for origin size and doing some standarddization... next round...
+				$this->create_thumb( $imageReference['tmp_name'][$i], public_path('images/def/thumb/'.$imageName.'.'.$imageTmpName[1]), 200);
+				move_uploaded_file( $imageReference['tmp_name'][$i], public_path('images/def/'.$imageName.'.'.$imageTmpName[1]));
+				$is->save();
+			}
+		}
+
 		Session::flash('flash_message', 'Successfully created a new Deficiency Correlation');
 
 		return redirect('admin/deficiency/create');
@@ -144,6 +210,7 @@ class DeficiencyController extends Controller{
 	 */
 	public function updateForm($id){
 		$def = Deficiency::find($id);
+		$images = ImageStore::where('linked_table_id', '=', $id)->where('link_table', '=', 'deficiency')->get(['id', 'image_name']);
 		$crops = DB::table('crop')->orderby('name', 'asc')->orderby('sub_type')->get();
 		$elements = Element::all();
 
@@ -153,33 +220,31 @@ class DeficiencyController extends Controller{
 		$def->cropID = $def->crop_id;
 		unset($def->crop_id);
 
-		for($i=1; $i<5; $i++){
-			$imageName = 'image_'.$i;
-			$imagePath = 'images/def/'.$def->$imageName;
-
-			if(!file_exists(public_path($imagePath)) || $def->$imageName === '' || is_null($def->$imageName)){
-				$def->$imageName = 'images/no-image.png';
-			}
-			else{
-				$def->$imageName = $imagePath;
-			}
-		}
-
-		return view('pages.deficiency-update', compact('def', 'crops', 'elements'));
+		return view('pages.deficiency-update', compact('def','images', 'crops', 'elements'));
 	}
 
-
-	public function removeImage($number, $id){
-		$d = Deficiency::find($id);
-		$imageField = 'image_'.$number;
-		if($d->$imageField !== ''){
-			File::delete(base_path().'/public/images/def/'.$d->$imageField);
-			$d->$imageField = null;
-			$d->save();
+	/**
+	 * @desc REMOVE INDIVIDUAL IMAGE FROM DEFICIENCY
+	 * @param $def_id
+	 * @param $id
+	 *
+	 * @return json[status=> 200|400, message]
+	 *
+	 * NOTE: If the app grows more this should be changed to obfuscate the id's and decrypt them here.
+	 */
+	public function removeImage(int $def_id, int $id){
+		$remove_item = ImageStore::find($id);
+		if($remove_item->link_table === 'deficiency' && $remove_item->linked_table_id === $def_id){
+			if(file_exists(public_path('images/def/'.$remove_item->image_name)) ){
+				File::delete(base_path().'/public/images/def/'.$remove_item->image_name);
+				ImageStore::destroy($remove_item->id);
+			}
+		}
+		else{
+			return json_encode(['status'=>400, 'message'=>'There was an issue removing the image']);
 		}
 
-		$data = [array('imagePosition'=>$number)];
-		return json_encode($data);
+		return json_encode(['status'=>200, 'message'=>'You have sucessufully remove the image']);
 	}
 	/**
 	 * @param Request $request
@@ -187,18 +252,10 @@ class DeficiencyController extends Controller{
 	 * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
 	 */
 	public function update(Request $request, $id){
-		/**
-		 * NEED TO CREATE  A FUNCTION TO REMOVE INDIVIDUAL IMAGES OR
-		 * -- REWRITE TO MAKE IT DYNAMIC LIKE I DO IN THE BOAT AD
-		 *
-		 *
-		 * FOR THE MOMENT DO A REMOVE IMAGE
-		 *
-		 * THEN UPGRADE IT LATER....... UGGG.
-		 */
 		$nowTime = time();
-
 		$validated = $request->all();
+		$imageReference = $_FILES['images'];
+		$num_of_images_sent = count($imageReference['name']);
 
 		$this->validate($request, ['nameShort' => 'max:35|required',
 		                           'cropID' => 'required',
@@ -209,21 +266,6 @@ class DeficiencyController extends Controller{
 
 		$d = Deficiency::find($id);
 
-		for($i=1; $i<5; $i++){
-			if($request->hasFile('image'.$i) && $validated['image'.$i] !== ''){
-				//remove the old file first
-				File::delete(base_path().'/public/images/def/'.$d['image_'.$i]);
-
-				$imageTmpName = explode('.', $request->file('image'.$i)->getClientOriginalName());
-				$imageName = sha1(preg_replace("/[^ \w]+/", '',time().$imageTmpName[0] ) );
-				$field_name = 'image_'.$i;
-				//Image::make($image->getRealPath())->resize(200, 200)->save($path);
-
-				$d->$field_name = substr($imageName, 0,40).'.'.$imageTmpName[1];
-				$request->file('image'.$i)->move(base_path() . '/public/images/def/', $d->$field_name);
-			}
-		}
-
 		$d->name_short = $validated['nameShort'];
 		$d->deficiency_description = $validated['defDescription'];
 		$d->element_id = $validated['elementID'];
@@ -233,6 +275,28 @@ class DeficiencyController extends Controller{
 		$d->removed_dte = $nowTime;
 
 		$d->save();
+		// THIS WORKS THE SAME WAY AS ADD, OLD PHOTOS ARE REMOVED BY MICRO SERVER INTERACTION IN ANGULAR FRONT END
+		for($i=0; $i<$num_of_images_sent; $i++){
+			if($imageReference['name'][$i] !== '' && $imageReference['size'][$i] > 100 && $validated['existing'][$i] == 0){
+				$imageTmpName = explode('.', $imageReference['name'][$i]);
+				$imageName = sha1(preg_replace("/[^ \w]+/", '',time().$imageTmpName[0] ) );
+
+				$is = new ImageStore();
+				$is->link_table = 'deficiency';
+				$is->linked_table_id = $d->id;
+				$is->active = 1;
+				$is->approved_by = Auth::user()->id;
+				$is->image_name = $imageName.'.'.$imageTmpName[1];
+				$is->create_by = Auth::user()->id;
+				$is->last_update_by = Auth::user()->id;
+				$is->create_dte = $nowTime;
+				$is->last_update = $nowTime;
+				//should be checking for origin size and doing some standarddization... next round...
+				$this->create_thumb( $imageReference['tmp_name'][$i], public_path('images/def/thumb/'.$imageName.'.'.$imageTmpName[1]), 200);
+				move_uploaded_file( $imageReference['tmp_name'][$i], public_path('images/def/'.$imageName.'.'.$imageTmpName[1]));
+				$is->save();
+			}
+		}
 
 		Session::flash('flash_message', 'Successfully Update a new Deficiency Correlation');
 
@@ -246,33 +310,27 @@ class DeficiencyController extends Controller{
 		$d->defDescription = $d->deficiency_description;
 		$d->elementID = $d->element_id;
 		$d->cropID = $d->crop_id;
-		$d->image1  = $d->image_1;
-		$d->image2 = $d->image_2;
-		$d->image3 = $d->image_3;
-		$d->image4 = $d->image_4;
-
-		unset($d->image_1);
-		unset($d->image_2);
-		unset($d->image_3);
-		unset($d->image_4);
 		unset($d->crop_id);
 		unset($d->element_id);
-		//$def = ['deficiency'=>$d];
-
 		return json_encode($d);
 	}
 
 	/**
 	 * @param $id
 	 * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+	 *
+	 * NOTE: considered FK delete on cascade but, this will store images associated with multiple tables.
+	 *
 	 */
 	public function delete($id){
 		$d = Deficiency::find($id);
-
-		for($i=1; $i<5; $i++){
-			$imageName = 'image_'.$i;
-			if(file_exists(public_path('images/def/'.$d->$imageName)) ){
-				File::delete(base_path().'/public/images/def/'.$d->$imageName);
+		//echo "r >>> ".$id;
+		$images = DB::select('SELECT id, image_name FROM image_store WHERE link_table = "deficiency" AND linked_table_id = :link_id;', ['link_id'=>$id]);
+//print_r($images); exit();
+		foreach($images as $i){
+			if(file_exists(public_path('images/def/'.$i->image_name)) ){
+				File::delete(base_path().'/public/images/def/'.$i->image_name);
+				ImageStore::destroy($i->id);
 			}
 		}
 		$d->delete();
@@ -290,13 +348,17 @@ class DeficiencyController extends Controller{
 	 *	inner join crop c
 	 *	on c.id = d.crop_id;
 	 */
-	public function deficiencyImagelist() {
+	public function deficiencyImagelist(Request $request) {
 		$query = 'select i.id, i.image_name, d.name_short, d.deficiency_description, c.name AS crop_name, c.sub_type AS sub_type 
 				  from image_store i 
 				  inner join deficiency d on i.linked_table_id = d.id 
-				  inner join crop c on c.id = d.crop_id';
+				  inner join crop c on c.id = d.crop_id
+		          WHERE i.link_table = "deficiency"
+		          AND i.active = 0;';
 		$newImages = DB::select($query);
-		$numRows = ImageStore::count();
+
+		$newImages = $this->arrayPaginator($newImages, $request);
+		$numRows = count($newImages);
 
 		return view('pages.deficincy-new-images', compact('newImages', 'numRows'));
 	}
@@ -336,5 +398,108 @@ class DeficiencyController extends Controller{
 		$image->delete();
 		Session::flash('flash_message', 'Successfully removed image');
 		return redirect('admin/deficiency/community_images');
+	}
+
+	/**
+	 * @param $src - a valid file location
+	 * @param $dest - a valid file target
+	 * @param $targetWidth - desired output width
+	 * @param $targetHeight - desired output height or null
+	 */
+	function create_thumb($src, $dest, $targetWidth, $add_extension_name = null, $targetHeight = null) {
+		// 1. Load the image from the given $src
+		// - see if the file actually exists
+		// - check if it's of a valid image type
+		// - load the image resource
+		// get the type of the image
+		// we need the type to determine the correct loader
+		$type = $this->exif_imagetype('file://'.$src);
+		// if no valid type or no handler found -> exit
+		if (!$type || !self::IMAGE_HANDLERS[$type]) {
+			return null;
+		}
+		// load the image with the correct loader
+		$image = call_user_func(self::IMAGE_HANDLERS[$type]['load'], $src);
+		// no image found at supplied location -> exit
+		if (!$image) {
+			return null;
+		}
+		// 2. Create a thumbnail and resize the loaded $image
+		// - get the image dimensions
+		// - define the output size appropriately
+		// - create a thumbnail based on that size
+		// - set alpha transparency for GIFs and PNGs
+		// - draw the final thumbnail
+		// get original image width and height
+		$width = imagesx($image);
+		$height = imagesy($image);
+		// maintain aspect ratio when no height set
+		if ($targetHeight == null) {
+			// get width to height ratio
+			$ratio = $width / $height;
+			// if is portrait
+			// use ratio to scale height to fit in square
+			if ($width > $height) {
+				$targetHeight = floor($targetWidth / $ratio);
+			}
+			// if is landscape
+			// use ratio to scale width to fit in square
+			else {
+				$targetHeight = $targetWidth;
+				$targetWidth = floor($targetWidth * $ratio);
+			}
+		}
+		// create duplicate image based on calculated target size
+		$thumbnail = imagecreatetruecolor($targetWidth, $targetHeight);
+		// set transparency options for GIFs and PNGs
+		if ($type == self::IMAGE_HANDLERS[IMAGETYPE_GIF] || $type == self::IMAGE_HANDLERS[IMAGETYPE_PNG]) {
+			// make image transparent
+			imagecolortransparent( $thumbnail, imagecolorallocate($thumbnail, 0, 0, 0)
+			);
+			// additional settings for PNGs
+			if ($type == self::IMAGE_HANDLERS[IMAGETYPE_PNG]) {
+				imagealphablending($thumbnail, false);
+				imagesavealpha($thumbnail, true);
+			}
+		}
+		// copy entire source image to duplicate image and resize
+		imagecopyresampled(
+			$thumbnail,
+			$image,
+			0, 0, 0, 0,
+			$targetWidth, $targetHeight,
+			$width, $height
+		);
+		// 3. Save the $thumbnail to disk
+		// - call the correct save method
+		// - set the correct quality level
+		// save the duplicate version of the image to disk
+		return call_user_func(
+			self::IMAGE_HANDLERS[$type]['save'],
+			$thumbnail,
+			$dest,
+			self::IMAGE_HANDLERS[$type]['quality']
+		);
+	}
+
+
+	function exif_imagetype ( $filename ) {
+		if(!is_file($filename)) return false;
+		// TODO: HANDLE FILESIZE 0 !! THIS WILL CRASH THE aop
+		if ( ( list($width, $height, $type, $attr) = getimagesize( $filename ) ) !== false ) {
+			return $type;
+		}
+		return false;
+	}
+
+
+	public function arrayPaginator($array, $request)
+	{
+		$page = Input::get('page', 1);
+		$perPage = 10;
+		$offset = ($page * $perPage) - $perPage;
+
+		return new LengthAwarePaginator(array_slice($array, $offset, $perPage, true), count($array), $perPage, $page,
+			['path' => $request->url(), 'query' => $request->query()]);
 	}
 }

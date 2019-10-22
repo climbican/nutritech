@@ -69,7 +69,7 @@
                                                 <a href="{{url('')}}/admin/sufficiency/update/{{$suff->id}}">Edit</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('')}}/admin/sufficiency/delete/{{$suff->id}}">Delete</a>
+                                                <a href="{{url('')}}/admin/sufficiency/delete/{{$suff->id}}" onclick="return confirm('Are you sure you want to remove this entry?')">Delete</a>
                                             </li>
                                         </ul>
                                     </div>

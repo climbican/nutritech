@@ -62,11 +62,9 @@
                                     </div>
                                 </div>
                             @endforeach
-
                             @if($numRows > 0)
-                                <div class="text-center"><span style="margin-left:4%; padding-top:20px;">Total {{$numRows}}</span></div>
+                                <div class="text-center">{{$newImages->links()}}<span style="margin-left:4%; padding-top:20px;">Total {{$numRows}}</span></div>
                             @endif
-
                             @if($numRows < 1)
                                 <div class="row">
                                     <div class="col-lg-12 text-center">

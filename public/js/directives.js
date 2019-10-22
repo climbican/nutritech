@@ -1,7 +1,19 @@
 ledgedogAdmin
-
+    .directive('ngConfirmClick', [
+        function(){
+            return {
+                link: function (scope, element, attr) {
+                    var msg = attr.ngConfirmClick || "Are you sure?";
+                    var clickAction = attr.confirmedClick;
+                    element.bind('click',function (event) {
+                        if ( window.confirm(msg) ) {
+                            scope.$eval(clickAction)
+                        }
+                    });
+                }
+            };
+        }])
     .directive('ngMatch', ['$parse', function ($parse) {
-
         var directive = {
             link: link,
             restrict: 'A',
@@ -10,7 +22,7 @@ ledgedogAdmin
         return directive;
 
         function link(scope, elem, attrs, ctrl) {
-// if ngModel is not defined, we don't need to do anything
+            // if ngModel is not defined, we don't need to do anything
             if (!ctrl) return;
             if (!attrs['ngMatch']) return;
 
@@ -28,6 +40,5 @@ ledgedogAdmin
             attrs.$observe('ngMatch', function () {
                 validator(ctrl.$viewValue);
             });
-
         }
     }]);

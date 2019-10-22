@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ProductElement;
+use App\ProductGroup;
 use Illuminate\Http\Request;
 use App\Product;
 use App\Crop;
@@ -77,15 +78,23 @@ class ProductController extends Controller{
 	 * @desc this is specifically for the product data table
 	 *
 	 * @return false|string
+	 *
+	 * TODO: need to modify this one to include product group, colors and active flag!!
 	 */
 	public function fetch_all_prod_with_elements() {
-		$items  = Product::all();
+		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_pri, pg.color_sec
+					FROM product p 
+					INNER JOIN product_group pg
+						ON p.product_group_id = pg.id
+					WHERE p.active = 1
+					ORDER BY pg.name ASC;');
+		//$products  = Product::all();
 		$fields = array();
 		$patterns = array();
 		$patterns[0] = '/\r/';
 		$patterns[1] = '/\n/';
 
-		foreach($items as $item) {
+		foreach($products as $product) {
 			$prod = []; //p.product_id,
 			$product_elements = DB::select('SELECT A.id, A.chemical_name, B.*
 								    FROM element A
@@ -95,18 +104,23 @@ class ProductController extends Controller{
 								                    ON p.element_id = e.id
 								WHERE p.product_id = ?) AS B
 								    ON A.ID = B.element_id
-								WHERE A.id IN (15, 3, 18, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)', [$item->id]);
+								WHERE A.id IN (15, 3, 18, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)', [$product->id]);
 
 			foreach($product_elements as $pe) {
+
+
 				if(is_null($pe->percent) || $pe->percent === NULL || $pe->percent == ''){
 					$prod[strtolower($pe->chemical_name)] = '-';
 				}
 				else { $prod[strtolower($pe->chemical_name)] = $pe->percent; }
 			}
 
-			$prod['productId'] = $item->id;
-			$prod['productName'] = $item->product_name;
-			$prod['imageUrl'] = $item->image_url;
+			$prod['productId'] = $product->id;
+			$prod['productName'] = $product->product_name;
+			$prod['imageUrl'] = $product->image_url;
+			$prod['group_name'] = $product->group_name;
+			$prod['color_pri'] = $product->color_pri;
+			$prod['color_sec'] = $product->color_sec;
 
 			array_push($fields, $prod);
 		} //end foreach
@@ -133,7 +147,9 @@ class ProductController extends Controller{
             $pe = DB::select('SELECT e.element_name, p.element_id, p.percent, p.is_guaranteed_amt
             FROM product_element p 
             INNER JOIN element e 
-            ON p.element_id = e.id
+                ON p.element_id = e.id
+            INNER JOIN product_group pg
+            	ON p.product_group_id = pg.id
             WHERE p.product_id = ?', [$item->id]);
 
             $prod['id'] = $item->id;
@@ -163,8 +179,9 @@ class ProductController extends Controller{
         $crops = Crop::all();
         $compat = Compatibility::all();
         $elements = Element::all();
+        $product_group =  ProductGroup::all();
 
-        return view('pages.product-create', compact('crops', 'compat', 'elements'));
+        return view('pages.product-create', compact('crops', 'compat', 'elements', 'product_group'));
     }
 
     /**
@@ -190,6 +207,8 @@ class ProductController extends Controller{
         $product->image_url = '';
         $product->compatibility = '';
         $product->net_contents = '';
+        $product->active = 0;
+        $product->product_group_id = 0;
 
         if($request->hasFile('productImage')){
             $imageTmpName = explode('.', $request->file('productImage')->getClientOriginalName());
@@ -207,6 +226,8 @@ class ProductController extends Controller{
         if(isset($validated['benefits']) && $validated['benefits'] != ''){ $product->benefits = $validated['benefits']; }
         if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = $product->compatibility = str_replace('number:',"",$validated['compatibilityType']);}
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
+        if(isset($validated['isActive']) && $validated['isActive'] !== ''){$product->active = 1;}
+        if(isset($validated['productGroup']) && $validated['productGroup'] !== ''){$product->product_group_id = $validated['productGroup'];}
         //TRACKING
         $product->added_by = Auth::user()->id;
         $product->last_update_by = Auth::user()->id;
@@ -244,6 +265,7 @@ class ProductController extends Controller{
 		$prod = Product::find($id);
 		$elements = Element::all();
 		$compat = Compatibility::all();
+		$product_group =  ProductGroup::all();
 
 		if(!file_exists(public_path('images/product/'.$prod->image_url)) || $prod->image_url === ''){
 			$prod->image_url = 'no-image.png';
@@ -260,8 +282,9 @@ class ProductController extends Controller{
 		$prod['benefits'] = $t->benefits;
 		$prod['compatibility'] = $t->compatibility;
 		$prod['netContents'] = $t->net_contents;
+		$prod['productGroupID'] = $t->product_group_id;
 
-		return view('pages.product-update', compact('prod', 'elements', 'compat', 'element_fields'));
+		return view('pages.product-update', compact('prod', 'elements', 'compat', 'element_fields', 'product_group'));
 	}
 
     /**
@@ -290,7 +313,6 @@ class ProductController extends Controller{
             $product->image_url = substr($imageName, 0,40).'.'.$imageTmpName[1];
             $request->file('productImage')->move(base_path() . '/public/images/product/', $product->image_url);
         }
-        //$product['product_group'] = $validated['productGroup'];
         $product->product_name = $validated['productName'];
         $product->product_subname = '';
         $product->description = '';
@@ -298,12 +320,15 @@ class ProductController extends Controller{
         $product->benefits = '';
         $product->compatibility = '';
         $product->net_contents = '';
+        $product->active = 0;
         if(isset($validated['subTitle']) && $validated['subTitle'] != '' ){ $product->product_subname = $validated['subTitle']; }
         if(isset($validated['description']) && $validated['description'] != ''){ $product->description = $validated['description']; }
         if(isset($validated['dilution']) && $validated['dilution'] != ''){ $product->dilution = $validated['dilution']; }
         if(isset($validated['benefits']) && $validated['benefits'] != ''){ $product->benefits = $validated['benefits']; }
         if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = $validated['compatibilityType'];}
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
+	    if(isset($validated['isActive']) && $validated['isActive'] !== ''){$product->active = 1;}
+	    if(isset($validated['productGroup']) && $validated['productGroup'] !== ''){$product->product_group_id = $validated['productGroup'];}
         //TRACKING
 
         $product->last_update = $nowTime;

@@ -246,18 +246,19 @@ ledgedogAdmin
                 });
         }; //END FETCH USER
 
-        $scope.removeImage = function(number, id){
+        $scope.removeImage = function(def_id, image_id){
             $http({
-                method: 'POST',
-                url:  $scope.urlBase + 'admin/deficiency/remove/image/'+number+'/'+id,
+                method: 'DELETE',
+                url:  $scope.urlBase + 'admin/deficiency/remove/image/' + def_id + '/' + image_id,
                 timeout: 4000,
                 headers: {'Content-Type': 'application/json'}
             })
                 .then(function(response){
                     //remove the image from the UI ?? innerHTML
                    // console.log('inner position :: '+angular.toJson(response.data));
-                    var div = document.getElementById('preview'+response.data[0].imagePosition);
-                    div.innerHTML = '<img src="'+$scope.urlBase+'images/no-image.png'+'"/>';
+                    // CHANGED TO A DIFFERENT CODE BASE WITH JQUERY.
+                    //var div = document.getElementById('preview'+response.data[0].imagePosition);
+                    //div.innerHTML = '<img src="'+$scope.urlBase+'images/no-image.png'+'"/>';
 
                 });
         };

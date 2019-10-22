@@ -16,7 +16,7 @@
                 </div>
             @endif
             <div class="card">
-                <form name="create_deficiency" method="post" action="{{url('admin/deficiency/save')}}" enctype="multipart/form-data">
+                <form name="create_deficiency" id="create_deficiency" method="post" action="{{url('admin/deficiency/save')}}" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     <div class="card-body card-padding">
                         <!-- ASSOCIATED ELEMENT -->
@@ -88,59 +88,25 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
-                                    <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
-                                    <div>
-                                        <span class="btn btn-info btn-file">
-                                            <span class="fileinput-new">Image 1</span>
-                                            <span class="fileinput-exists">Change</span>
-                                            <input type="file" name="image1" ng-model="image1" id="image1">
-                                        </span>
-                                        <a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>
-                                    </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row" style="margin-bottom:20px;">
+                                    <div class="col-md-8">Add additional images with the <span style="font-weight:bold;font-size:110%;">"+"</span> button</div>
+                                    <div class="col-md-4 text-right"><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></div>
                                 </div>
-                            </div>
-
-                            <div class="col-sm-3">
-                                <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
-                                    <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
-                                    <div>
-                                        <span class="btn btn-info btn-file">
-                                            <span class="fileinput-new">Image 2</span>
-                                            <span class="fileinput-exists">Change</span>
-                                            <input type="file" name="image2" ng-model="image2" id="image2">
-                                        </span>
-                                        <a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-3">
-                                <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
-                                    <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
-                                    <div>
-                                        <span class="btn btn-info btn-file">
-                                            <span class="fileinput-new">Image 3</span>
-                                            <span class="fileinput-exists">Change</span>
-                                            <input type="file" name="image3" ng-model="image3" id="image3">
-                                        </span>
-                                        <a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-3">
-                                <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
-                                    <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
-                                    <div>
-                                        <span class="btn btn-info btn-file">
-                                            <span class="fileinput-new">Image 4</span>
-                                            <span class="fileinput-exists">Change</span>
-                                            <input type="file" name="image4" ng-model="image4" id="image4">
-                                        </span>
-                                        <a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>
+                                <div class="row" id="image_cells">
+                                    <div class="col-sm-3 ind_image_cell">
+                                        <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
+                                            <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>
+                                            <div>
+                                                <span class="btn btn-info btn-file">
+                                                    <span class="fileinput-new">Select First</span>
+                                                    <span class="fileinput-exists">Change</span>
+                                                    <input type="file" name="images[]"/>
+                                                </span>
+                                                <a href="#" class="btn btn-danger fileinput-exists remove" data-dismiss="fileinput">Remove</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -155,4 +121,46 @@
             </div>
         </div>
     </section>
+    <script type="text/javascript">
+
+        if (window.addEventListener)
+            window.addEventListener("load", loadScriptOnComplete, false);
+        else if (window.attachEvent)
+            window.attachEvent("onload", loadScriptOnComplete);
+        else window.onload = loadScriptOnComplete;
+
+
+        function loadScriptOnComplete() {
+            /** for static file load
+             var element = document.createElement("script");
+             element.src = "defer.js";
+             document.body.appendChild(element);
+             */
+
+            var form = document.getElementById('create_deficiency');
+            var formSubmit = form.submit; //save reference to original submit function
+            $(document).on('click', '.add', function(){
+                var html = '';
+                html += '<div class="col-sm-3 ind_image_cell">\n' +
+                        '  <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">\n' +
+                        '    <div class="fileinput-preview thumbnail" data-trigger="fileinput"></div>\n' +
+                        '      <div>\n' +
+                        '        <span class="btn btn-info btn-file">\n' +
+                        '        <span class="fileinput-new">Image</span>\n' +
+                        '        <span class="fileinput-exists">Change</span>\n' +
+                        '          <input type="file" name="images[]">\n' +
+                        '        </span>\n' +
+                        '        <a href="#" class="btn btn-danger fileinput-exists remove" data-dismiss="fileinput">Remove</a>\n' +
+                        '    </div>\n' +
+                        '  </div>\n' +
+                        '</div>';
+
+                $('#image_cells').append(html);
+            });
+
+            $(document).on('click', '.remove', function(){
+                $(this).closest('.ind_image_cell').remove();
+            });
+        }
+    </script>
 @endsection

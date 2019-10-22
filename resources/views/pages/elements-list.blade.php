@@ -54,7 +54,7 @@
                                                 <a href="{{url('admin/element/update/'.$elem->id)}}">Edit</a>
                                             </li>
                                             <li>
-                                                <a href="{{url('admin/element/delete/'.$elem->id)}}"  onclick="return confirm('Are you sure you want to remove {{$product->element_name}}?')">Delete</a>
+                                                <a href="{{url('admin/element/delete/'.$elem->id)}}"  onclick="return confirm('Are you sure you want to remove {{$elem->element_name}}?')">Delete</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -64,7 +64,6 @@
                         @if($numRows > 0)
                             <div class="text-center">{{$elements->links()}}  &nbsp; <span style="margin-left:4%; padding-top:30px;">Total {{$numRows}}</span></div>
                         @endif
-
                         @if($numRows < 1)
                             <div class="row">
                                 <div class="col-lg-12 text-center">

@@ -19,7 +19,6 @@
                 <form name="create_product" id="create_product" method="post" action="{{url('admin/product/save')}}" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     <div class="card-body card-padding">
-
                         <div class="row" style="margin-top: 20px;">
                             <div class="col-sm-3">
                                 <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
@@ -35,6 +34,28 @@
                                 </div>
                             </div>
                             <div class="col-sm-8">
+                                <div class="row" style="margin-bottom:20px;">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <div class="toggle-switch" data-ts-color="blue">
+                                                <label for="ts3" class="ts-label">Is Active Product</label>
+                                                <input id="isActive" name="isActive" type="checkbox" hidden="hidden" value="1" checked>
+                                                <label for="isActive" class="ts-helper"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class=" form-group">
+                                            <!-- <label for="compatibility">Compatibility</label>-->
+                                            <select chosen
+                                                    name="productGroup"
+                                                    data-placeholder="Product Group" class="w-100">
+                                                <option value="none">-NONE-</option>
+                                                @foreach($product_group as $pg)<option value="{{$pg->id}}">{{$pg->name}}</option>@endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group fg-float m-b-30 fg-toggled"
@@ -187,7 +208,7 @@
                 var formSubmit = form.submit; //save reference to original submit function
                 $(document).on('click', '.add', function(){
                     var html = '';
-                    html += '<tr style="line-height:50px;padding-bottom:10px;">';
+                    html += '<tr>';
                     html += '<td class="form-group"><div class="fg-line"><select  name="elementList[]" data-placeholder="Select a Element..." class="form-control elementList"><option value="">Select one</option>\n' +
                         '@foreach($elements as $e)\n' +
                         '<option value="{{$e->id}}">{{$e->element_name}}</option>@endforeach</select></div></td>';
@@ -195,7 +216,7 @@
                         '   <input type="text" name="percentPPM[]" class="form-control fg-input percentPPM" ng-minlength="1" ng-maxlength="25">\n' +
                         '   <label class="fg-label">Percent / PPM</label>\n' +
                         '   </td>';
-                    html += '<td class="checkbox"><label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" checked><i class="input-helper"></i>Is Guaranteed</label></td>';
+                    html += '<td class="checkbox" style="margin:0px;padding-top:21px;padding-bottom:0px;"><label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" checked><i class="input-helper"></i>Is Guaranteed</label></td>';
                     html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
 
                     $('#item_table').append(html);

@@ -20,7 +20,6 @@
                     <form name="update_product" id="update_product" method="post" action="{{url('admin/product/update'.'/'.$prod->id)}}" enctype="multipart/form-data">
                         {!! csrf_field() !!}
                         <div class="card-body card-padding">
-
                             <div class="row" style="margin-top: 20px;">
                                 <div class="col-sm-3">
                                     <div class="fileinput fileinput-new" data-provides="fileinput" style="margin:0px auto 25px auto;">
@@ -36,6 +35,28 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-8">
+                                    <div class="row" style="margin-bottom:20px;">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <div class="toggle-switch" data-ts-color="blue">
+                                                    <label for="ts3" class="ts-label">Is Active Product</label>
+                                                    <input id="isActive" name="isActive" type="checkbox" hidden="hidden" value="1" @if($prod->active) checked @endif>
+                                                    <label for="isActive" class="ts-helper"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class=" form-group">
+                                                <!-- <label for="compatibility">Compatibility</label>-->
+                                                <select chosen
+                                                        name="productGroup"
+                                                        data-placeholder="Product Group" class="w-100">
+                                                    <option value="none">-PRODUCT GROUP-</option>
+                                                    @foreach($product_group as $pg)<option value="{{$pg->id}}" @if($pg->id == $prod->productGroupID){{'selected'}}@endif>{{$pg->name}}</option>@endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <div class="form-group m-b-30 fg-toggled"
@@ -152,14 +173,17 @@
 
                                         <div class="card-body table-responsive">
                                             <table class="table" id="item_table">
-                                                <tr>
-                                                    <th>Nutrient Name</th>
-                                                    <th>Percent / PPM </th>
-                                                    <th>Is Guaranteed</th>
-                                                    <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
-                                                </tr>
-                                                @foreach($element_fields as $ef)
-                                                    <tr style="line-height:50px;padding-bottom:10px;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nutrient Name</th>
+                                                        <th>Percent / PPM </th>
+                                                        <th>Is Guaranteed</th>
+                                                        <th><button type="button" name="add" class="btn btn-success btn-sm add"><span class="glyphicon glyphicon-plus"></span></button></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($element_fields as $ef)
+                                                    <tr>
                                                         <td class="form-group">
                                                             <div class="fg-line">
                                                                 <select  name="elementList[]" data-placeholder="Select a Element..." class="form-control elementList">
@@ -174,13 +198,15 @@
                                                                 <input type="text" name="percentPPM[]" value="{{$ef->percent}}" class="form-control fg-input percentPPM" ng-maxlength="25">
                                                             </div>
                                                         </td>
-                                                        <td class="checkbox">
+                                                        <td class="checkbox fg-float fg-toggled" style="margin:0px;padding-top:21px;padding-bottom:0px;">
                                                             <label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" @if($ef->is_guaranteed_amt){{'checked'}}@endif><i class="input-helper"></i>Is Guaranteed</label></td>
                                                         <td>
                                                             <button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button>
                                                         </td>
                                                     </tr>
-                                                @endforeach
+                                                    @endforeach
+                                                </tbody>
+
                                             </table>
                                         </div>
                                     </div>
@@ -211,21 +237,30 @@
              var element = document.createElement("script");
              element.src = "defer.js";
              document.body.appendChild(element);
+
+             NOTE: !!  I THINK THE ONLY WAY TO IMPROVE THIS PART IS TO ALLOW MICRO SERVER INTERACTIONS ALLOWING INDIVIDUAL ROWS TO BE DELETE / UPDATE ON THEIR OWN.
+             OR --> OR --> BETTER --> -->
+
+             USE JSON [{ID, AMT, GUARNTEED},  {ID, AMT, GUARNTEED}, {ID, AMT, GUARNTEED} ]
+
+             AND STORE IN ONE ROW INSTEAD OF
+             THIS WOULD ELIMINATE THE NEED FOR BRIDGE TABLES
+
              */
 
             var form = document.getElementById('update_product');
             var formSubmit = form.submit; //save reference to original submit function
             $(document).on('click', '.add', function(){
                 var html = '';
-                html += '<tr style="line-height:50px;padding-bottom:10px;">';
+                html += '<tr>';
                 html += '<td class="form-group"><div class="fg-line"><select  name="elementList[]" data-placeholder="Select a Element..." class="form-control elementList"><option value="">Select one</option>\n' +
                     '@foreach($elements as $e)\n' +
                     '<option value="{{$e->id}}">{{$e->element_name}}</option>@endforeach</select></div></td>';
                 html += '<td class="form-group fg-float m-b-30 fg-toggled"><div class="fg-line">\n' +
-                    '   <input type="text" name="percentPPM[]" class="form-control fg-input percentPPM" ng-minlength="1" ng-maxlength="25">\n' +
+                    '<input type="text" name="entryState[]" class="form-control fg-input percentPPM"/>' +
                     '   <label class="fg-label">Percent / PPM</label>\n' +
                     '   </td>';
-                html += '<td class="checkbox"><label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" checked><i class="input-helper"></i>Is Guaranteed</label></td>';
+                html += '<td class="checkbox" style="margin:0px;padding-top:21px;padding-bottom:0px;"><label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" checked><i class="input-helper"></i>Is Guaranteed</label></td>';
                 html += '<td><button type="button" name="remove" class="btn btn-danger btn-sm remove"><span class="glyphicon glyphicon-minus"></span></button></td></tr>';
 
                 $('#item_table').append(html);

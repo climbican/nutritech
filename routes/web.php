@@ -10,9 +10,15 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/copy/data/to/table', 'DeficiencyController@copy_images_to_image_store');
+
+
 Route::get('/', function () {
 	return redirect('/login');
 });
+
+Route::get('create_crop_thumb', 'DeficiencyController@generate_thumbs');
 
 /**Route::get('/passport', function() {
 	return view('passport-issue');
@@ -68,13 +74,13 @@ Route::post('admin/compatibility/fetch', 'CompatibilityController@fetchList');
 //DEFICIENCY
 Route::get('admin/deficiency/list', 'DeficiencyController@index');
 Route::post('admin/deficiency/list', 'DeficiencyController@fetchList');
-Route::post('admin/deficiency/lookup/{id}', 'DeficiencyController@fetchDeficiency');
+Route::post('admin/deficiency/lookup/{id}', 'DeficiencyController@fetchDeficiency'); // ???
 Route::get('admin/deficiency/create', 'DeficiencyController@create');
 Route::post('admin/deficiency/save', 'DeficiencyController@save');
 Route::get('admin/deficiency/update/{id}', 'DeficiencyController@updateForm');
 Route::post('admin/deficiency/update/{id}', 'DeficiencyController@update');
 Route::get('admin/deficiency/delete/{id}',  'DeficiencyController@delete');
-Route::get('admin/deficiency/remove/image/{number}/{id}', 'DeficiencyController@removeImage');
+Route::delete('admin/deficiency/remove/image/{def_id}/{image_id}', 'DeficiencyController@removeImage');
 
 Route::get('admin/deficiency/community_images', 'DeficiencyController@deficiencyImagelist');
 Route::get('admin/deficiency/community_image/approve/{id}',  'DeficiencyController@approveImage');
