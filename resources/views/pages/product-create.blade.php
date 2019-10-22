@@ -45,12 +45,23 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <div class="toggle-switch" data-ts-color="blue">
+                                                <label for="ts3" class="ts-label">Is Visible in <strong>Mobile APP</strong></label>
+                                                <input id="showFlag" name="showFlag" type="checkbox" hidden="hidden" value="1" checked>
+                                                <label for="isActive" class="ts-helper"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-bottom:20px;">
+                                    <div class="col-sm-6">
                                         <div class=" form-group">
                                             <!-- <label for="compatibility">Compatibility</label>-->
                                             <select chosen
                                                     name="productGroup"
                                                     data-placeholder="Product Group" class="w-100">
-                                                <option value="none">-NONE-</option>
+                                                <option value="none">-PRODUCT GROUP-</option>
                                                 @foreach($product_group as $pg)<option value="{{$pg->id}}">{{$pg->name}}</option>@endforeach
                                             </select>
                                         </div>

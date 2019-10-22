@@ -20,6 +20,7 @@ class Product extends Model
         'net_contents',
         'image_url',
 	    'active',
+	    'show_flag',
         'added_by',
         'last_update_by',
         'create_dte',

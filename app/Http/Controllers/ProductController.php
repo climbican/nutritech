@@ -82,13 +82,12 @@ class ProductController extends Controller{
 	 * TODO: need to modify this one to include product group, colors and active flag!!
 	 */
 	public function fetch_all_prod_with_elements() {
-		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_pri, pg.color_sec
+		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_pri, pg.color_sec, p.show_flag AS showFlag
 					FROM product p 
 					INNER JOIN product_group pg
 						ON p.product_group_id = pg.id
 					WHERE p.active = 1
 					ORDER BY pg.name ASC;');
-		//$products  = Product::all();
 		$fields = array();
 		$patterns = array();
 		$patterns[0] = '/\r/';
@@ -209,6 +208,7 @@ class ProductController extends Controller{
         $product->net_contents = '';
         $product->active = 0;
         $product->product_group_id = 0;
+        $product->show_flag = 0;
 
         if($request->hasFile('productImage')){
             $imageTmpName = explode('.', $request->file('productImage')->getClientOriginalName());
@@ -227,6 +227,7 @@ class ProductController extends Controller{
         if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = $product->compatibility = str_replace('number:',"",$validated['compatibilityType']);}
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
         if(isset($validated['isActive']) && $validated['isActive'] !== ''){$product->active = 1;}
+        if(isset($validated['showFlag']) && $validated['showFlag'] !== ''){$product->show_flag = 1;}
         if(isset($validated['productGroup']) && $validated['productGroup'] !== ''){$product->product_group_id = $validated['productGroup'];}
         //TRACKING
         $product->added_by = Auth::user()->id;
@@ -321,6 +322,8 @@ class ProductController extends Controller{
         $product->compatibility = '';
         $product->net_contents = '';
         $product->active = 0;
+        $product->show_flag = 0;
+
         if(isset($validated['subTitle']) && $validated['subTitle'] != '' ){ $product->product_subname = $validated['subTitle']; }
         if(isset($validated['description']) && $validated['description'] != ''){ $product->description = $validated['description']; }
         if(isset($validated['dilution']) && $validated['dilution'] != ''){ $product->dilution = $validated['dilution']; }
@@ -328,6 +331,7 @@ class ProductController extends Controller{
         if(isset($validated['compatibilityType']) && $validated['compatibilityType'] != ''){ $product->compatibility = $validated['compatibilityType'];}
         if(isset($validated['netContents']) && $validated['netContents'] !== ''){$product->net_contents = $validated['netContents'];}
 	    if(isset($validated['isActive']) && $validated['isActive'] !== ''){$product->active = 1;}
+	    if(isset($validated['showFlag']) && $validated['showFlag'] !== ''){$product->show_flag = 1;}
 	    if(isset($validated['productGroup']) && $validated['productGroup'] !== ''){$product->product_group_id = $validated['productGroup'];}
         //TRACKING
 

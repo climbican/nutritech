@@ -46,6 +46,17 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <div class="toggle-switch" data-ts-color="blue">
+                                                    <label for="ts3" class="ts-label">Is Visible in <strong>Mobile APP</strong></label>
+                                                    <input id="showFlag" name="showFlag" type="checkbox" hidden="hidden" value="1" @if($prod->show_flag) checked @endif>
+                                                    <label for="showFlag" class="ts-helper"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-bottom:20px;">
+                                        <div class="col-sm-6">
                                             <div class=" form-group">
                                                 <!-- <label for="compatibility">Compatibility</label>-->
                                                 <select chosen
