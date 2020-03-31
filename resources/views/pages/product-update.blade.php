@@ -268,7 +268,7 @@
                     '@foreach($elements as $e)\n' +
                     '<option value="{{$e->id}}">{{$e->element_name}}</option>@endforeach</select></div></td>';
                 html += '<td class="form-group fg-float m-b-30 fg-toggled"><div class="fg-line">\n' +
-                    '<input type="text" name="entryState[]" class="form-control fg-input percentPPM"/>' +
+                    '<input type="text" name="percentPPM[]" class="form-control fg-input percentPPM"/>' +
                     '   <label class="fg-label">Percent / PPM</label>\n' +
                     '   </td>';
                 html += '<td class="checkbox" style="margin:0px;padding-top:21px;padding-bottom:0px;"><label><input type="checkbox" value="1" name="guaranteedAmt[]" class="guaranteedAmt" checked><i class="input-helper"></i>Is Guaranteed</label></td>';

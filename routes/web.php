@@ -41,10 +41,8 @@ Route::post('admin/product/update/{id}', 'ProductController@update');
 Route::get('admin/product/delete/{id}', 'ProductController@delete');
 Route::get('admin/product/lookup/{id}', 'ProductController@autoComplete');
 Route::post('admin/product/elements/lookup/{id}', 'ProductController@fetchProductElements');
-Route::get('admin/product/all/element/chart/data', 'ProductController@fetch_all_prod_with_elements');
+Route::get('admin/product/all/element/chart/data', 'ProductController@generate_chart_data');
 Route::get('admin/product/json-list', 'ProductController@fetch_all_prod_page');
-// this one just pulls the data via AJAX
-Route::get('admin/product/json_data/', 'ProductController@fetchList');
 //CROPS
 Route::get('admin/crop/list', 'CropController@index');
 Route::post('admin/crop/list', 'CropController@fetchList');

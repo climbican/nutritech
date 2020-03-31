@@ -123,8 +123,12 @@ class DeficiencyController extends Controller{
 		$result = [];
 
 		foreach($def as $d){
-			array_push($result, array('id'=>$d->id, 'nameShort'=>$d->name_short, 'defDescription'=>$d->deficiency_description, 'elementID'=>$d->element_id,
-			                          'cropID'=>$d->crop_id, 'image1'=>$d->image_1, 'image2'=>$d->image_2, 'image3'=>$d->image_3, 'image4'=>$d->image_4));
+			// only include descriptions that are over 50 characters long.
+			// UPDATE:  --> tested and set live dec 4, 2019 -->
+			if(strlen($d->deficiency_description) > 50) {
+				array_push($result, array('id'=>$d->id, 'nameShort'=>$d->name_short, 'defDescription'=>$d->deficiency_description, 'elementID'=>$d->element_id,
+				                          'cropID'=>$d->crop_id, 'image1'=>$d->image_1, 'image2'=>$d->image_2, 'image3'=>$d->image_3, 'image4'=>$d->image_4));
+			}
 		}
 		return json_encode($result);
 	}

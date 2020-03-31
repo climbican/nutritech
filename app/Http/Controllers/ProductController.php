@@ -38,8 +38,13 @@ class ProductController extends Controller{
 
         return view('pages.product-list', compact('products', 'numRows'));
     }
+
+    /**
+     * @desc This is the app data for the product list. DO NOT CONFUSE WITH THE APP CHART DATA BELOW....
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
 	public function fetch_all_prod_page() {
-		$items  = Product::all();
+		$items  = DB::select('SELECT * FROM product WHERE active = 1 AND show_flag = 1;');
 		$fields = array();
 		$patterns = array();
 		$patterns[0] = '/\r/';
@@ -48,8 +53,8 @@ class ProductController extends Controller{
 		foreach($items as $item) {
 			$prod = []; //p.product_id,
 			$pe = DB::select('SELECT e.element_name, p.element_id, p.percent, p.is_guaranteed_amt
-            FROM product_element p 
-            INNER JOIN element e 
+            FROM product_element p
+            INNER JOIN element e
             ON p.element_id = e.id
             WHERE p.product_id = ?', [$item->id]);
 
@@ -72,8 +77,6 @@ class ProductController extends Controller{
 
 		return view('pages.product_json', compact('fields'));
 	}
-
-
 	/**
 	 * @desc this is specifically for the product data table
 	 *
@@ -81,13 +84,14 @@ class ProductController extends Controller{
 	 *
 	 * TODO: need to modify this one to include product group, colors and active flag!!
 	 */
-	public function fetch_all_prod_with_elements() {
-		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_pri, pg.color_sec, p.show_flag AS showFlag
-					FROM product p 
+	public function generate_chart_data() {
+		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_header, pg.color_pri, pg.color_sec, p.show_flag AS showFlag
+					FROM product p
 					INNER JOIN product_group pg
 						ON p.product_group_id = pg.id
 					WHERE p.active = 1
-					ORDER BY pg.name ASC;');
+						AND p.show_flag = 1
+					ORDER BY pg.name, p.product_name ASC;');
 		$fields = array();
 		$patterns = array();
 		$patterns[0] = '/\r/';
@@ -97,7 +101,7 @@ class ProductController extends Controller{
 			$prod = []; //p.product_id,
 			$product_elements = DB::select('SELECT A.id, A.chemical_name, B.*
 								    FROM element A
-								LEFT OUTER JOIN (SELECT  p.element_id, p.percent, p.is_guaranteed_amt
+								LEFT OUTER JOIN (SELECT p.element_id, p.percent, p.is_guaranteed_amt
 								FROM product_element p
 								         INNER JOIN element e
 								                    ON p.element_id = e.id
@@ -106,8 +110,6 @@ class ProductController extends Controller{
 								WHERE A.id IN (15, 3, 18, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)', [$product->id]);
 
 			foreach($product_elements as $pe) {
-
-
 				if(is_null($pe->percent) || $pe->percent === NULL || $pe->percent == ''){
 					$prod[strtolower($pe->chemical_name)] = '-';
 				}
@@ -117,9 +119,10 @@ class ProductController extends Controller{
 			$prod['productId'] = $product->id;
 			$prod['productName'] = $product->product_name;
 			$prod['imageUrl'] = $product->image_url;
-			$prod['group_name'] = $product->group_name;
-			$prod['color_pri'] = $product->color_pri;
-			$prod['color_sec'] = $product->color_sec;
+			$prod['groupName'] = $product->group_name;
+			$prod['colorHeader'] = $product->color_header;
+			$prod['colorPri'] = $product->color_pri;
+			$prod['colorSec'] = $product->color_sec;
 
 			array_push($fields, $prod);
 		} //end foreach
@@ -128,14 +131,14 @@ class ProductController extends Controller{
 		$fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
 
 		//return json_encode($fields);
-		return view('pages.products_json', compact('fields'));
+		return view('pages.product_chart_json', compact('fields'));
 	}
 	/**
 	 * @desc I USED THIS TO EXPORT DATA TO THE APP.  Now it will be used for the API as well.
 	 * @return false|string
 	 */
     public function fetchList(){
-        $items  = Product::all();
+        $items  = Product::where('active', '=', 1)->where('show_flag', '=', 1);
         $fields = array();
 	    $patterns = array();
 	    $patterns[0] = '/\r/';
@@ -144,11 +147,11 @@ class ProductController extends Controller{
         foreach($items as $item) {
             $prod = []; //p.product_id,
             $pe = DB::select('SELECT e.element_name, p.element_id, p.percent, p.is_guaranteed_amt
-            FROM product_element p 
-            INNER JOIN element e 
+            FROM product_element p
+            INNER JOIN element e
                 ON p.element_id = e.id
             INNER JOIN product_group pg
-            	ON p.product_group_id = pg.id
+            	ON p.product_id = pg.id
             WHERE p.product_id = ?', [$item->id]);
 
             $prod['id'] = $item->id;
@@ -165,7 +168,6 @@ class ProductController extends Controller{
             $fields[$item->id] = $prod;
         } //end foreach
 
-	    echo  stripslashes(json_encode($fields)); exit();
 
 
         return json_encode(['status'=>200, 'message'=>'Your list of Products', 'list'=>$fields]);
@@ -264,7 +266,7 @@ class ProductController extends Controller{
 	 */
 	public function updateForm($id){
 		$prod = Product::find($id);
-		$elements = Element::all();
+		$elements = DB::table('element')->orderBy('element_name')->get();
 		$compat = Compatibility::all();
 		$product_group =  ProductGroup::all();
 
@@ -344,7 +346,6 @@ class ProductController extends Controller{
         $i = 0;
 
         DB::table('product_element')->where('product_id', '=', $product->id)->delete();
-
 	    foreach($validated['elementList'] as $e) {
 		    $pe = new ProductElement();
 		    $pe->product_id = $product_id;

@@ -31,7 +31,10 @@
                                         </li>
                                         <li><a href="{{url('')}}/admin/product/list">List All</a></li>
                                         <li>
-                                            <a href="{{url('admin/product/json-list')}}">Export for App</a>
+                                            <a href="{{url('admin/product/json-list')}}">Export for Product listings in App</a>
+                                        </li>
+                                        <li>
+                                            <a href="{{url('admin/product/all/element/chart/data')}}">Export for Chart Data in App</a>
                                         </li>
                                     </ul>
                                 </li>

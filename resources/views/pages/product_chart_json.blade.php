@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
     <section id="main">
-        <h4 style="margin-left:15px;">JSON CONTENT FOR USE IN APP</h4>
+        <h4 style="margin-left:15px;">JSON CONTENT FOR DATA CHART! IN APP</h4>
         <pre><code class="language-json">{{$fields}}</code></pre>
     </section>
 

@@ -9,6 +9,7 @@ class ProductGroup extends Model
 	protected $table = 'product_group';
 	protected $fillable = ['id',
 		'name',
+		'color_header',
 		'color_pri',
 		'color_sec',
 		'active',
