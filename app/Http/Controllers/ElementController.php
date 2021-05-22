@@ -40,8 +40,6 @@ class ElementController extends Controller{
 	    return json_encode($fields);
     }
 
-
-
     //CREATE NEW COMPATIBILITY
     public function create(){
         return view('pages.elements-create');
@@ -74,9 +72,10 @@ class ElementController extends Controller{
 	    //if(isset($element['nutrientGroup']) && $element['nutrientGroup'] !== ''){ $params_to_save['nutrient_group'] = $element['nutrientGroup']; }
 	    //if(isset($element['atomicNumber']) && $element['atomicNumber'] !== ''){ $params_to_save['atomic_number'] = $element['atomicNumber']; }
 
-        $element['added_by'] = Auth::user()->id;
-        $element['create_dte'] = time();
-        $element['last_update'] = time();
+        $params_to_save['added_by'] = Auth::user()->id;
+        $params_to_save['create_dte'] = time();
+        $params_to_save['last_update'] = time();
+        $params_to_save['last_update_by'] = Auth::user()->id;
 
         Element::create($params_to_save);
         \Session::flash('flash_message', 'Successfully created an Element!');

@@ -81,10 +81,12 @@ class ProductController extends Controller{
 	 * @desc this is specifically for the product data table
 	 *
 	 * @return false|string
+     *
+     * @param string $return_type [json array or view]
 	 *
 	 * TODO: need to modify this one to include product group, colors and active flag!!
 	 */
-	public function generate_chart_data() {
+	public function generate_chart_data(string $return_type="view") {
 		$products = DB::select('SELECT p.id, p.product_name, p.image_url, pg.name AS group_name, pg.color_header, pg.color_pri, pg.color_sec, p.show_flag AS showFlag
 					FROM product p
 					INNER JOIN product_group pg
@@ -130,8 +132,12 @@ class ProductController extends Controller{
 		$fields = stripslashes(json_encode($fields, JSON_NUMERIC_CHECK));
 		$fields = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:',$fields);
 
-		//return json_encode($fields);
-		return view('pages.product_chart_json', compact('fields'));
+		if ($return_type === 'view'){
+		    return view('pages.product_chart_json', compact('fields'));
+        }
+		else {
+            return json_encode($fields);
+        }
 	}
 	/**
 	 * @desc I USED THIS TO EXPORT DATA TO THE APP.  Now it will be used for the API as well.
@@ -193,7 +199,7 @@ class ProductController extends Controller{
         $nowTime = time();
 	    $product = new Product();
 
-        $this->validate($request, ['productName' => 'max:35|unique:product,product_name|required',
+        $this->validate($request, ['productName' => 'max:45|unique:product,product_name|required',
             'subTitle' => 'max:25',
             'description' => 'required']);
 

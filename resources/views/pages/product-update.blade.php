@@ -76,11 +76,11 @@
                                                     <label class="fg-label">Product Name</label>
                                                     <input type="text" name="productName" value="{{$prod->productName}}" id="productName"
                                                            class="form-control fg-input"
-                                                           ng-minlength="3" ng-maxlength="25">
+                                                           ng-minlength="3" ng-maxlength="45">
                                                 </div>
                                                 <div ng-messages="update_product.productName.$error" ng-show="update_product.productName.$dirty">
                                                     <small class="help-block" ng-message="minlength">This too short</small>
-                                                    <small class="help-block" ng-message="maxlength">Sorry we can only take 30 characters</small>
+                                                    <small class="help-block" ng-message="maxlength">Sorry we can only take 45 characters</small>
                                                     <small class="help-block" ng-message="required">This field is required</small>
                                                 </div>
                                             </div>
