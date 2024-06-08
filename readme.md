@@ -26,28 +26,3 @@ Illuminate\Database\Query\Builder.php to accept another param because the origin
         ]);
     }
 ```
-###Setup for pulling git hub repository
-```text
-Github >> Settings (right side of screen) >>> SSH & GPG Keys
-add new key from server see below
-
-
---> check version first to see if it's installed
-git --version
---> if not install 
-apt install git
---> add key from server to github??? 
---- instructions from github https://help.github.com/en/github/authenticating-to-github/error-permission-denied-publickey
- 
---> ssh-keygen
---- This will start the process of generating key
---- copy the contents 
-vi id_rsa.pub
-```
-
-###Update server from GIT
-```text
-git pull git@github.com:climbican/fitnessfeed_serv.git
----> password for id_rsa.pub key --->d1g3M()pSlut<---
-
-```
